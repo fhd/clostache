@@ -6,6 +6,8 @@ Clostache
 Although it already works with simple templates, this is still work in
 progress. See the TODO file for not yet implemented features.
 
+[![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
+
 Usage
 -----
 
