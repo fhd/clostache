@@ -23,8 +23,8 @@
            (let [var-name (name k)
                  var-value (k data)]
              (if (instance? String var-value)
-               [[(str "\\{\\{\\{" var-name "\\}\\}\\}") var-value]
-                [(str "\\{\\{" var-name "\\}\\}")
+               [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
+                [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
                  (escape-html var-value)]])))))
 
 (defn- remove-comments
@@ -44,7 +44,7 @@
             body-start (+ (.indexOf section "}}") 2)
             body-end (.lastIndexOf section "{{")
             body (.substring section body-start body-end)
-            section-name (.substring section 3 (- body-start 2))]
+            section-name (.trim (.substring section 3 (- body-start 2)))]
         (Section. section-name body start end)))))
 
 (defn render
