@@ -27,6 +27,11 @@
                 [(str "\\{\\{" var-name "\\}\\}")
                  (escape-html var-value)]])))))
 
+(defn- remove-comments
+  "Removes comments from the template."
+  [template]
+  (replace-all template [["\\{\\{\\![^\\}]*\\}\\}" ""]]))
+
 (defn- extract-section
   "Extracts the outer section from the template."
   [template]
@@ -46,6 +51,7 @@
   "Renders the template with the data."
   [template data]
   (let [replacements (create-variable-replacements data)
+        template (remove-comments template)
         section (extract-section template)]
     (if (nil? section)
       (replace-all template replacements)
