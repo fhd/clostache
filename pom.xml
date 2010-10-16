@@ -9,6 +9,26 @@
     <packaging>jar</packaging>
     <name>Clostache</name>
     <description>{{ mustache }} for Clojure</description>
+    <url>http://github.com/fhd/clostache</url>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/fhd/clostache.git</connection>
+        <developerConnection>scm:git:git@github.com:fhd/clostache.git</developerConnection>
+        <url>http://github.com/fhd/clostache</url>
+    </scm>
+    <developers>
+        <developer>
+            <name>Felix H. Dahlke</name>
+            <email>fhd@ubercode.de</email>
+            <url>http://ubercode.de</url>
+        </developer>
+    </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
