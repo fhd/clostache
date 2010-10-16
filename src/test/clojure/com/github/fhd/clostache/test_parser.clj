@@ -20,3 +20,7 @@
   (is (= "Hello, Felix, Jenny!" (render "Hello{{#names}}, {{name}}{{/names}}!"
                                         {:names [{:name "Felix"}
                                                  {:name "Jenny"}]}))))
+
+(deftest test-render-comment
+  (is (= "Hello, Felix!" (render "Hello, {{! This is a comment.}}{{name}}!"
+                                 {:name "Felix"}))))
