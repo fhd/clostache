@@ -21,6 +21,9 @@
                                         {:names [{:name "Felix"}
                                                  {:name "Jenny"}]}))))
 
+(deftest test-render-empty-list
+  (is (= "" (render "{{#things}}Something{{/things}}" {:things []}))))
+
 (deftest test-render-comment
   (is (= "Hello, Felix!" (render "Hello, {{! This is a comment.}}{{name}}!"
                                  {:name "Felix"}))))
