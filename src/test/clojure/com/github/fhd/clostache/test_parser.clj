@@ -12,6 +12,10 @@
   (is (= "<h1>Heading</h1>"
          (render "{{{heading}}}" {:heading "<h1>Heading</h1>"}))))
 
+(deftest test-render-html-unescaped-ampersand
+  (is (= "<h1>Heading</h1>"
+         (render "{{&heading}}" {:heading "<h1>Heading</h1>"}))))
+
 (deftest test-render-html-escaped
   (is (= "&lt;h1&gt;Heading&lt;/h1&gt;"
          (render "{{heading}}" {:heading "<h1>Heading</h1>"}))))

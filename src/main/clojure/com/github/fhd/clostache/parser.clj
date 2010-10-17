@@ -24,6 +24,7 @@
                  var-value (k data)]
              (if (instance? String var-value)
                [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
+                [(str "\\{\\{\\&s*" var-name "\\s*\\}\\}") var-value]
                 [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
                  (escape-html var-value)]])))))
 
