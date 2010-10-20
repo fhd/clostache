@@ -60,5 +60,8 @@
             after (.substring template (:end section))
             section-data ((keyword (:name section)) data)]
         (str (replace-all before replacements)
-             (map-str (fn [m] (render (:body section) m)) section-data)
+             (if (vector? section-data)
+                 (map-str (fn [m] (render (:body section) m)) section-data)
+                 (if section-data
+                   (replace-all (:body section) replacements)))
              (replace-all after replacements))))))

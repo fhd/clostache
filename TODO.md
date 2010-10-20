@@ -1,4 +1,3 @@
-* Implement boolean sections.
 * Implement lambdas.
 * Implement inverted sections.
 * Implement partials.
