@@ -1,4 +1,4 @@
-0.2.0
+0.2.0 (2010-10-20)
 ==================
 * Added comment tags.
 * Made it possible for tags to contain whitespace (e.g. `{{ name }}`).
