@@ -35,3 +35,11 @@
 (deftest test-render-tags-with-whitespace
   (is (= "Hello, Felix" (render "Hello, {{# names }}{{ name }}{{/ names }}"
                                 {:names [{:name "Felix"}]}))))
+
+(deftest test-render-boolean-true
+  (is (= "Hello, Felix" (render "Hello, {{#condition}}Felix{{/condition}}"
+                                {:condition true}))))
+
+(deftest test-render-boolean-false
+  (is (= "Hello, " (render "Hello, {{#condition}}Felix{{/condition}}"
+                          {:condition false}))))
