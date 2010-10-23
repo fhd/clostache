@@ -16,7 +16,7 @@ The easiest way to use Clostache in your project is via
 
 This is how you can use Clostache from the REPL:
 
-	=> (use 'com.github.fhd.clostache.parser)
+	=> (use 'clostache.parser)
 	=> (render "Hello, {{name}}!" {:name "Felix"})
 	"Hello, Felix!"
 

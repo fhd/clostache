@@ -1,6 +1,6 @@
-(ns com.github.fhd.clostache.test-parser
+(ns clostache.test-parser
   (:use clojure.test
-        com.github.fhd.clostache.parser))
+        clostache.parser))
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
