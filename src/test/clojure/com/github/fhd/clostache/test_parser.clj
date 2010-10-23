@@ -42,4 +42,4 @@
 
 (deftest test-render-boolean-false
   (is (= "Hello, " (render "Hello, {{#condition}}Felix{{/condition}}"
-                          {:condition false}))))
+                           {:condition false}))))
