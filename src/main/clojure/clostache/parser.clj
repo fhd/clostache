@@ -1,4 +1,4 @@
-(ns com.github.fhd.clostache.parser
+(ns clostache.parser
   "A parser for mustache templates."
   (:use [clojure.contrib.string :only (map-str)]))
 
