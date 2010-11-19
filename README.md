@@ -8,6 +8,13 @@ progress. See the TODO file for not yet implemented features.
 
 [![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
+Installation
+------------
+
+The easiest way to install it is to use [cljr](https://github.com/liebke/cljr) from [Clojars](http://clojars.org)
+
+  clrj install com.github.fhd.clostache/clostache
+
 Usage
 -----
 
