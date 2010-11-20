@@ -20,7 +20,7 @@
   (is (= "&amp;&quot;&lt;&gt;"
          (render "{{string}}" {:string "&\"<>"}))))
 
-(deftest test-render-simple-list
+(deftest test-render-list
   (is (= "Hello, Felix, Jenny!" (render "Hello{{#names}}, {{name}}{{/names}}!"
                                         {:names [{:name "Felix"}
                                                  {:name "Jenny"}]}))))
@@ -43,3 +43,17 @@
 (deftest test-render-boolean-false
   (is (= "Hello, " (render "Hello, {{#condition}}Felix{{/condition}}"
                            {:condition false}))))
+
+(deftest test-render-inverted-empty-list
+  (is (= "Empty" (render "{{^things}}Empty{{/things}}" {:things []}))))
+
+(deftest test-render-inverted-list
+  (is (= "" (render "{{^things}}Empty{{/things}}" {:things ["Something"]}))))
+
+(deftest test-render-inverted-boolean-true
+  (is (= "Hello, " (render "Hello, {{^condition}}Felix{{/condition}}"
+                           {:condition true}))))
+
+(deftest test-render-inverted-boolean-false
+  (is (= "Hello, Felix" (render "Hello, {{^condition}}Felix{{/condition}}"
+                                {:condition false}))))
