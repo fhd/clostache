@@ -1,5 +1,7 @@
-0.4.0
+0.4.0 (2010-11-20)
 ==================
+* Made HTML escaping identical to mustache.rb.
+* Added inverted sections.
 
 0.3.0 (2010-10-24)
 ==================
