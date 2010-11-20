@@ -3,8 +3,12 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-Although it already works with simple templates, this is still work in
-progress. See the TODO file for not yet implemented features.
+A few features are still missing, but it should work for most
+people. See the TODO file for not yet implemented features.
+
+There is another Mustache implementation for Clojure called
+[mustache.clj](https://github.com/christianberg/mustache.clj). We are
+currently figuring out how to best merge the projects.
 
 [![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
@@ -24,7 +28,118 @@ This is how you can use Clostache from the REPL:
 	=> (render "Hello, {{name}}!" {:name "Felix"})
 	"Hello, Felix!"
 
-See the test cases for more sophisticated examples.
+Examples
+--------
+
+### Variable replacement ###
+
+Variables are tags enclosed by two curly brackets (*mustaches*) and
+will be replaced with the respective data.
+
+Template:
+
+	Hello, {{person}}!
+	
+Data:
+
+	{:person "World"}
+
+Output:
+
+	Hello, World!
+
+### Escaped output ###
+
+The following characters will be replaced with HTML entities:
+`&"<>`. Tags that use three curly brackets or start with `{{&` will
+not be escaped.
+
+Template:
+
+	Escaped: {{html}}
+	Unescaped: {{{html}}}
+	Unescaped: {{&html}}
+	
+Data:
+
+	{:html "<h1>Hello, World!</h1>"}
+	
+Output:
+
+	Escaped: &lt;h1&gt;Hello, World!&lt;/h1&gt;
+	Unescaped: <h1>Hello, World!</h1>
+	Unescaped: <h1>Hello, World!</h1>
+
+### Sections ###
+
+Sections start with a tag beginning with `{{#` and end with one
+beginning with `{{/`. Their content is only rendered if the data is
+either the boolean value `true` or a non-empty list.
+
+Template:
+
+	{{#greet}}Hello, World!{{/greet}}
+	
+Data:
+
+	{:greet true}
+	
+Output:
+
+	Hello, World!
+
+In case of a list, the section's content is rendered for each element,
+and it can contain tags refering to the elements.
+
+Template:
+
+	<ul>
+	{{#people}}
+	    <li>{{name}}</li>
+	{{/people}}
+	</ul>
+	
+Data:
+
+	{:people [{:name "Felix"} {:name "Jenny"}]}
+	
+Output:
+
+	<ul>
+	    <li>Felix</li>
+	    <li<Jenny</li>
+	</ul>
+
+### Inverted sections ###
+
+Inverted sections start with a tag beginning with `{{^` and end with one
+beginning with `{{/`. Their content is only rendered if the data is
+either the boolean value `false` or an empty list.
+
+Template:
+
+	{{^ignore}}Hello, World!{{/ignore}}
+	
+Data:
+
+	{:ignore false}
+	
+Output:
+
+	Hello, World!
+
+### Comments ###
+
+Comments are tags that begin with `{{!`. They will not be rendered.
+
+Template:
+
+	<h2>Felix' section<h2>
+	{{! Look ma, I've written a section }}
+	
+Output:
+
+	<h2>Felix' section</h2>
 
 License
 -------
