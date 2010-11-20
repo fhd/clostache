@@ -2,7 +2,7 @@
   "A parser for mustache templates."
   (:use [clojure.contrib.string :only (map-str)]))
 
-(defrecord Section [name body start end])
+(defrecord Section [name body start end inverted])
 
 (defn- replace-all
   "Applies all replacements from the replacement list to the string."
@@ -40,16 +40,21 @@
   "Extracts the outer section from the template."
   [template]
   (let [start (.indexOf template "{{#")
+        start-inverted (.indexOf template "{{^")
         end-tag (.indexOf template "{{/" start)
         end (+ (.indexOf template "}}" end-tag) 2)]
-    (if (or (= start -1) (= end 1))
+    (if (or (and (= start -1) (= start-inverted -1))
+            (= end 1))
       nil
-      (let [section (.substring template start end)
+      (let [inverted (= start -1)
+            start (if inverted start-inverted start)
+            section (.substring template start end)
             body-start (+ (.indexOf section "}}") 2)
             body-end (.lastIndexOf section "{{")
             body (.substring section body-start body-end)
             section-name (.trim (.substring section 3 (- body-start 2)))]
-        (Section. section-name body start end)))))
+        (Section. section-name body start end inverted)))))
+  
 
 (defn render
   "Renders the template with the data."
@@ -63,8 +68,12 @@
             after (.substring template (:end section))
             section-data ((keyword (:name section)) data)]
         (str (replace-all before replacements)
-             (if (vector? section-data)
-               (map-str (fn [m] (render (:body section) m)) section-data)
-               (if section-data
-                 (replace-all (:body section) replacements)))
+             (if (:inverted section)
+               (if (or (and (vector? section-data) (empty? section-data))
+                       (not section-data))
+                 (:body section))
+               (if (vector? section-data)
+                 (map-str (fn [m] (render (:body section) m)) section-data)
+                 (if section-data
+                   (replace-all (:body section) replacements))))
              (replace-all after replacements))))))
