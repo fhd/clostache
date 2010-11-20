@@ -13,7 +13,10 @@
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
   [string]
-  (replace-all string [["<" "&lt;"] [">" "&gt;"]]))
+  (replace-all string [["&" "&amp;"]
+                       ["\"" "&quot;"]
+                       ["<" "&lt;"]
+                       [">" "&gt;"]]))
 
 (defn- create-variable-replacements
   "Creates pairs of variable replacements from the data."
