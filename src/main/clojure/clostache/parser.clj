@@ -54,7 +54,6 @@
             body (.substring section body-start body-end)
             section-name (.trim (.substring section 3 (- body-start 2)))]
         (Section. section-name body start end inverted)))))
-  
 
 (defn render
   "Renders the template with the data."
