@@ -66,13 +66,14 @@
       (let [before (.substring template 0 (:start section))
             after (.substring template (:end section))
             section-data ((keyword (:name section)) data)]
-        (recur (str before
-             (if (:inverted section)
-               (if (or (and (vector? section-data) (empty? section-data))
-                       (not section-data))
-                 (:body section))
-               (if (vector? section-data)
-                 (map-str (fn [m] (render (:body section) m)) section-data)
-                 (if section-data
-                   (replace-all (:body section) replacements))))
-             after) data)))))
+        (recur
+         (str before
+              (if (:inverted section)
+                (if (or (and (vector? section-data) (empty? section-data))
+                        (not section-data))
+                  (:body section))
+                (if (vector? section-data)
+                  (map-str (fn [m] (render (:body section) m)) section-data)
+                  (if section-data
+                    (replace-all (:body section) replacements))))
+              after) data)))))
