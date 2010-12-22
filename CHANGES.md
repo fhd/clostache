@@ -2,6 +2,10 @@
 ==================
 * Added support for repeated sections.
 
+0.4.1 (2010-12-21)
+==================
+* Added support for repeated sections.
+
 0.4.0 (2010-11-20)
 ==================
 * Made HTML escaping identical to mustache.rb.
