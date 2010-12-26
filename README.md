@@ -74,7 +74,7 @@ Output:
 
 Sections start with a tag beginning with `{{#` and end with one
 beginning with `{{/`. Their content is only rendered if the data is
-either the boolean value `true` or a non-empty list.
+either the boolean value `true`, a value or a non-empty list.
 
 Template:
 
@@ -109,6 +109,20 @@ Output:
 	    <li>Felix</li>
 	    <li<Jenny</li>
 	</ul>
+
+For single values, the section is rendered exactly once.
+
+Template:
+
+	{{#greeting}}{{text}}!{{/greeting}}
+
+Data:
+
+	{:greeting {:text "Hello, World"}}
+
+Output:
+
+	Hello, World!
 
 ### Inverted sections ###
 
