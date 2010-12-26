@@ -30,12 +30,9 @@
                       "Hello{{#names}}, {{name}}{{/names}}!")
                  {:names [{:name "Felix"} {:name "Jenny"}]}))))
 
-
-(deftest test-render-hash
-  ; according to mustache(5) non-false, non-list value
-  ; should be used as a context for a single rendering of a block
+(deftest test-render-single-value
   (is (= "Hello, Felix!" (render "Hello{{#person}}, {{name}}{{/person}}!"
-                                        {:person {:name "Felix"}}))))
+                                 {:person {:name "Felix"}}))))
 
 (deftest test-render-empty-list
   (is (= "" (render "{{#things}}Something{{/things}}" {:things []}))))

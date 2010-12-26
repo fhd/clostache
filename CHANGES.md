@@ -1,6 +1,6 @@
 0.5.0
 ==================
-* Added support for repeated sections.
+* Added support for single value sections.
 
 0.4.1 (2010-12-21)
 ==================
