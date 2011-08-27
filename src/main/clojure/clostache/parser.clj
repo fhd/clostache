@@ -73,7 +73,7 @@
                         (not section-data))
                   (:body section))
                 (if section-data
-                  (let [section-data (if (or (vector? section-data) (map? section-data)) section-data {})
-                        section-data (if (vector? section-data) section-data (vector section-data))]
+                  (let [section-data (if (or (sequential? section-data) (map? section-data)) section-data {})
+                        section-data (if (sequential? section-data) section-data [section-data])]
                     (map-str (fn [m] (render (:body section) m)) section-data))))
               after) data)))))
