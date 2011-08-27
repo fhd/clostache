@@ -6,10 +6,6 @@ Clostache
 A few features are still missing, but it should work for most
 people. See the TODO file for not yet implemented features.
 
-There is another Mustache implementation for Clojure called
-[mustache.clj](https://github.com/christianberg/mustache.clj). We are
-currently figuring out how to best merge the projects.
-
 [![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
 Usage
