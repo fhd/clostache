@@ -6,7 +6,7 @@ Clostache
 A few features are still missing, but it should work for most
 people. See the TODO file for not yet implemented features.
 
-[![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
+[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
 Usage
 -----
