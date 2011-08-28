@@ -1,4 +1,4 @@
-0.4.2 (2011-01-09)
+0.5.0
 ==================
 * Added support for single value sections.
 
