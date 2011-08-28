@@ -3,9 +3,6 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-A few features are still missing, but it should work for most
-people. See the TODO file for not yet implemented features.
-
 [![Flattr this](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
 Usage
