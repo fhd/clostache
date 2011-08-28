@@ -72,8 +72,8 @@
                 (if (or (and (vector? section-data) (empty? section-data))
                         (not section-data))
                   (:body section))
-                (if (vector? section-data)
-                  (map-str (fn [m] (render (:body section) m)) section-data)
-                  (if section-data
-                    (replace-all (:body section) replacements))))
+                (if section-data
+                  (let [section-data (if (or (sequential? section-data) (map? section-data)) section-data {})
+                        section-data (if (sequential? section-data) section-data [section-data])]
+                    (map-str (fn [m] (render (:body section) m)) section-data))))
               after) data)))))
