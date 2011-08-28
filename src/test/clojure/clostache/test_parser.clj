@@ -24,12 +24,15 @@
   (is (= "Hello, Felix, Jenny!" (render "Hello{{#names}}, {{name}}{{/names}}!"
                                         {:names [{:name "Felix"}
                                                  {:name "Jenny"}]}))))
-
 (deftest test-render-list-twice
   (is (= "Hello, Felix, Jenny! Hello, Felix, Jenny!"
          (render (str "Hello{{#names}}, {{name}}{{/names}}! "
                       "Hello{{#names}}, {{name}}{{/names}}!")
                  {:names [{:name "Felix"} {:name "Jenny"}]}))))
+
+(deftest test-render-single-value
+  (is (= "Hello, Felix!" (render "Hello{{#person}}, {{name}}{{/person}}!"
+                                 {:person {:name "Felix"}}))))
 
 (deftest test-render-empty-list
   (is (= "" (render "{{#things}}Something{{/things}}" {:things []}))))
