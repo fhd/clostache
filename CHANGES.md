@@ -1,3 +1,6 @@
+0.6.0
+==================
+
 0.5.0 (2011-09-28)
 ==================
 * Changed the Maven groupId to de.ubercode.clostache.
