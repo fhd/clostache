@@ -5,15 +5,17 @@ Clostache
 
 [![Flattr this](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
 
+**Please note:** The groupId has changed in 0.5, please update your dependencies.
+
 Usage
 -----
 
 The easiest way to use Clostache in your project is via
-[Clojars](http://clojars.org/com.github.fhd.clostache/clostache).
+[Clojars](http://clojars.org/de.ubercode.clostache/clostache).
 
 To install it via [cljr](https://github.com/liebke/cljr), run:
 
-	clrj install com.github.fhd.clostache/clostache
+	clrj install de.ubercode.clostache/clostache
 
 This is how you can use Clostache from the REPL:
 
