@@ -1,6 +1,8 @@
 0.5.0
 ==================
+* Changed the Maven groupId to de.ubercode.clostache.
 * Added support for single value sections.
+* Added support for sequences as lists.
 
 0.4.1 (2010-12-21)
 ==================
