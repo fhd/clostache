@@ -1,6 +1,8 @@
 (ns clostache.parser
   "A parser for mustache templates."
-  (:use [clojure.contrib.string :only (map-str)]))
+  (:use [clojure.contrib.string :only (map-str)])
+  (:import java.util.regex.Matcher)
+  )
 
 (defrecord Section [name body start end inverted])
 
@@ -8,7 +10,7 @@
   "Applies all replacements from the replacement list to the string."
   [string replacements]
   (reduce (fn [string [from to]]
-            (.replaceAll string from to)) string replacements))
+            (.replaceAll string from (Matcher/quoteReplacement to))) string replacements))
 
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
