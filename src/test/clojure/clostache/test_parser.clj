@@ -7,7 +7,7 @@
 
 (deftest test-render-with-dollar-sign
   (is (= "Hello, $Felix!" (render "Hello, {{! This is a comment.}}{{name}}!"
-                                 {:name "$Felix"}))))
+                                  {:name "$Felix"}))))
 
 (deftest test-render-multi-line
   (is (= "Hello\nFelix" (render "Hello\n{{name}}" {:name "Felix"}))))
@@ -82,4 +82,3 @@
 (deftest test-render-inverted-boolean-false
   (is (= "Hello, Felix" (render "Hello, {{^condition}}Felix{{/condition}}"
                                 {:condition false}))))
-
