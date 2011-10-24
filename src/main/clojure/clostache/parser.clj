@@ -57,6 +57,11 @@
             section-name (.trim (.substring section 3 (- body-start 2)))]
         (Section. section-name body start end inverted)))))
 
+(defn- remove-all-tags
+  "Removes all tags"
+  [template]
+  (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
+
 (defn render
   "Renders the template with the data."
   [template data]
@@ -64,7 +69,7 @@
         template (remove-comments template)
         section (extract-section template)]
     (if (nil? section)
-      (replace-all template replacements)
+      (remove-all-tags (replace-all template replacements))
       (let [before (.substring template 0 (:start section))
             after (.substring template (:end section))
             section-data ((keyword (:name section)) data)]

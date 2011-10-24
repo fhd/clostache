@@ -15,6 +15,9 @@
 (deftest test-nil-variable
   (is (= "Hello, " (render "Hello, {{name}}" {:name nil}))))
 
+(deftest test-missing-variables
+  (is (= "Hello, . " (render "Hello, {{name}}. {{{greeting}}}" {}))))
+
 (deftest test-render-html-unescaped
   (is (= "&\\\"<>"
          (render "{{{string}}}" {:string "&\\\"<>"}))))
