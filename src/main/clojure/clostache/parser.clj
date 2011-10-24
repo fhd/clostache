@@ -1,8 +1,7 @@
 (ns clostache.parser
   "A parser for mustache templates."
   (:use [clojure.contrib.string :only (map-str)])
-  (:import java.util.regex.Matcher)
-  )
+  (:import java.util.regex.Matcher))
 
 (defrecord Section [name body start end inverted])
 
@@ -10,7 +9,8 @@
   "Applies all replacements from the replacement list to the string."
   [string replacements]
   (reduce (fn [string [from to]]
-            (.replaceAll string from (Matcher/quoteReplacement to))) string replacements))
+            (.replaceAll string from (Matcher/quoteReplacement to)))
+          string replacements))
 
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
@@ -75,7 +75,11 @@
                         (not section-data))
                   (:body section))
                 (if section-data
-                  (let [section-data (if (or (sequential? section-data) (map? section-data)) section-data {})
-                        section-data (if (sequential? section-data) section-data [section-data])]
-                    (map-str (fn [m] (render (:body section) m)) section-data))))
+                  (let [section-data (if (or (sequential? section-data)
+                                             (map? section-data))
+                                       section-data {})
+                        section-data (if (sequential? section-data) section-data
+                                         [section-data])]
+                    (map-str (fn [m]
+                               (render (:body section) m)) section-data))))
               after) data)))))
