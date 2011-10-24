@@ -12,6 +12,9 @@
 (deftest test-render-multi-line
   (is (= "Hello\nFelix" (render "Hello\n{{name}}" {:name "Felix"}))))
 
+(deftest test-nil-variable
+  (is (= "Hello, " (render "Hello, {{name}}" {:name nil}))))
+
 (deftest test-render-html-unescaped
   (is (= "&\\\"<>"
          (render "{{{string}}}" {:string "&\\\"<>"}))))

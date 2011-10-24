@@ -26,7 +26,7 @@
   (apply concat
          (for [k (keys data)]
            (let [var-name (name k)
-                 var-value (k data)]
+                 var-value ((fn [x] (if (nil? x) "" x)) (k data))]
              (if (instance? String var-value)
                [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
                 [(str "\\{\\{\\&s*" var-name "\\s*\\}\\}") var-value]
