@@ -1,5 +1,6 @@
 0.6.0
 ==================
+* Fixed rendering issues with dollar signs and backslashes.
 * Made missing and nil variables render as empty strings.
 
 0.5.0 (2011-09-28)
