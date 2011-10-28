@@ -1,4 +1,4 @@
-0.6.0
+0.6.0 (2011-10-28)
 ==================
 * Fixed rendering issues with dollar signs and backslashes.
 * Made missing and nil variables render as empty strings.
