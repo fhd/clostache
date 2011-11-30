@@ -3,8 +3,6 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/73492/Clostache)
-
 **Please note:** The groupId has changed in 0.5, please update your dependencies.
 
 Usage
