@@ -48,6 +48,11 @@
             <artifactId>jline</artifactId>
             <version>0.9.94</version>
         </dependency>
+        <dependency>
+            <groupId>clj-yaml</groupId>
+            <artifactId>clj-yaml</artifactId>
+            <version>0.3.1</version>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/clojure</sourceDirectory>
