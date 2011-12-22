@@ -25,8 +25,10 @@
 (deftest test-comments
   (run-spec-tests "comments"))
 
+(deftest test-delimiters
+  (run-spec-tests "delimiters"))
+
 ;; TODO: Test the following specs:
-;; - delimiters
 ;; - interpolation
 ;; - inverted
 ;; - sections
