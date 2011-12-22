@@ -8,8 +8,9 @@
 (defn- replace-all
   "Applies all replacements from the replacement list to the string."
   [string replacements]
-  (reduce (fn [string [from to]]
-            (.replaceAll string from (Matcher/quoteReplacement to)))
+  (reduce (fn [string [from to dont-quote]]
+            (.replaceAll string from
+                         (if dont-quote to (Matcher/quoteReplacement to))))
           string replacements))
 
 (defn- escape-html
@@ -36,7 +37,10 @@
 (defn- remove-comments
   "Removes comments from the template."
   [template]
-  (replace-all template [["\\{\\{\\![^\\}]*\\}\\}" ""]]))
+  (let [comment-regex "\\{\\{\\![^\\}]*\\}\\}"]
+    (replace-all template [[(str "(^|[\n\r])[ \t]*" comment-regex
+                                 "(\r\n|[\r\n]|$)") "$1" true]
+                           [comment-regex ""]])))
 
 (defn- extract-section
   "Extracts the outer section from the template."
