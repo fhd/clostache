@@ -62,15 +62,58 @@
         (Section. section-name body start end inverted)))))
 
 (defn- remove-all-tags
-  "Removes all tags"
+  "Removes all tags from the template."
   [template]
   (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
+
+(defn- escape-regex
+  "Escapes characters that have special meaning in regular expressions."
+  [regex]
+  (let [chars-to-escape ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"]]
+    (replace-all regex (map #(repeat 2 (str "\\" %)) chars-to-escape))))
+
+(defn- process-set-delimiters
+  "Replaces custom set delimiters with mustaches."
+  [template]
+  (let [builder (StringBuilder. template)
+        open-delim (atom "\\{\\{")
+        close-delim (atom "\\}\\}")
+        set-delims (fn [open close]
+                     (doseq [[var delim]
+                             [[open-delim open] [close-delim close]]]
+                       (swap! var (constantly (escape-regex delim)))))]
+    (loop [offset 0]
+      (let [string (.toString builder)
+            matcher (re-matcher
+                     (re-pattern (str @open-delim ".*?" @close-delim))
+                     string)]
+        (if (.find matcher offset)
+          (let [match-result (.toMatchResult matcher)
+                match-start (.start match-result)
+                match-end (.end match-result)
+                match (.substring string match-start match-end)]
+            (if-let [delim-change (re-find
+                                   (re-pattern (str @open-delim "=(.*?) (.*?)="
+                                                    @close-delim))
+                                   match)]
+              (do
+                (apply set-delims (rest delim-change))
+                (.delete builder match-start match-end)
+                (recur match-start))
+              (if-let [tag (re-find
+                            (re-pattern (str @open-delim "(.*?)" @close-delim))
+                            match)]
+                (do
+                  (.replace builder match-start match-end
+                            (str "{{" (second tag) "}}"))
+                  (recur match-end))))))))
+  (.toString builder)))
 
 (defn render
   "Renders the template with the data."
   [template data]
   (let [replacements (create-variable-replacements data)
-        template (remove-comments template)
+        template (remove-comments (process-set-delimiters template))
         section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))

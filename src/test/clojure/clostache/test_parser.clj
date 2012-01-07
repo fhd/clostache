@@ -88,3 +88,13 @@
 (deftest test-render-inverted-boolean-false
   (is (= "Hello, Felix" (render "Hello, {{^condition}}Felix{{/condition}}"
                                 {:condition false}))))
+
+(deftest test-render-with-delimiters
+  (is (= "Hello, Felix" (render "{{=<% %>=}}Hello, <%name%>" {:name "Felix"}))))
+
+(deftest test-render-with-regex-delimiters
+  (is (= "Hello, Felix" (render "{{=[ ]=}}Hello, [name]" {:name "Felix"}))))
+
+(deftest test-render-with-delimiters-changed-twice
+  (is (= "Hello, Felix" (render "{{=[ ]=}}[greeting], [=<% %>=]<%name%>"
+                                {:greeting "Hello" :name "Felix"}))))
