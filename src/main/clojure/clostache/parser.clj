@@ -27,12 +27,11 @@
   (apply concat
          (for [k (keys data)]
            (let [var-name (name k)
-                 var-value ((fn [x] (if (nil? x) "" x)) (k data))]
-             (if (instance? String var-value)
-               [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
-                [(str "\\{\\{\\&s*" var-name "\\s*\\}\\}") var-value]
-                [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
-                 (escape-html var-value)]])))))
+                 var-value (str (k data))]
+             [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
+              [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
+              [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
+               (escape-html var-value)]]))))
 
 (defn- remove-comments
   "Removes comments from the template."

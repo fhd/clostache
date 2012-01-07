@@ -34,8 +34,10 @@
 ;; (deftest test-delimiters
 ;;   (run-spec-tests "delimiters"))
 
+(deftest test-interpolation
+  (run-spec-tests "interpolation"))
+
 ;; TODO: Test the following specs:
-;; - interpolation
 ;; - inverted
 ;; - sections
 ;; - partials
