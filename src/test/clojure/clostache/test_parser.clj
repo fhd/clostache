@@ -59,6 +59,10 @@
 (deftest test-render-empty-list
   (is (= "" (render "{{#things}}Something{{/things}}" {:things []}))))
 
+
+(deftest test-render-nested-list
+  (is (= "z" (render "{{#x}}{{#y}}{{z}}{{/y}}{{/x}}" {:x {:y {:z "z"}}}))))
+
 (deftest test-render-comment
   (is (= "Hello, Felix!" (render "Hello, {{! This is a comment.}}{{name}}!"
                                  {:name "Felix"}))))
