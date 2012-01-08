@@ -98,3 +98,7 @@
 (deftest test-render-with-delimiters-changed-twice
   (is (= "Hello, Felix" (render "{{=[ ]=}}[greeting], [=<% %>=]<%name%>"
                                 {:greeting "Hello" :name "Felix"}))))
+
+(deftest test-render-tag-with-dotted-name-like-section
+  (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
+                                {:felix {:name "Felix"}}))))

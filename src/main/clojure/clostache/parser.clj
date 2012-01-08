@@ -1,6 +1,6 @@
 (ns clostache.parser
   "A parser for mustache templates."
-  (:use [clojure.contrib.string :only (map-str)])
+  (:use [clojure.contrib.string :only (map-str split)])
   (:import java.util.regex.Matcher))
 
 (defrecord Section [name body start end inverted])
@@ -108,11 +108,44 @@
                   (recur match-end))))))))
   (.toString builder)))
 
+(defn- convert-path
+  "Convert a tag with a dotted name to nested sections, using the
+  supplied delimiters to access the value."
+  [tag open-delim close-delim]
+  (let [builder (StringBuilder.)
+        tail-builder (StringBuilder.)
+        elements (split #"\." tag)]
+    (doseq [element (butlast elements)]
+      (.append builder (str "{{#" element "}}"))
+      (.insert tail-builder 0 (str "{{/" element "}}")))
+    (.append builder (str open-delim (last elements) close-delim))
+    (str (.toString builder) (.toString tail-builder))))
+
+(defn- convert-paths
+  "Converts tags with dotted tag names to nested sections."
+  [template]
+  (loop [s template]
+    (let [matcher (re-matcher #"(\{\{[\{&]?)([^\}]*\.[^\}]*)(\}{2,3})" s)]
+      (if-let [match (re-find matcher)]
+        (let [match-result (.toMatchResult matcher)
+              match-start (.start match-result)
+              match-end (.end match-result)
+              converted (convert-path (nth match 2) (nth match 1)
+                                      (nth match 3))]
+          (recur (str (.substring s 0 match-start) converted
+                      (.substring s match-end))))
+        s))))
+
+(defn- preprocess
+  "Preprocesses the template (e.g. removing comments)."
+  [template]
+  (convert-paths (remove-comments (process-set-delimiters template))))
+
 (defn render
   "Renders the template with the data."
   [template data]
   (let [replacements (create-variable-replacements data)
-        template (remove-comments (process-set-delimiters template))
+        template (preprocess template)
         section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))
