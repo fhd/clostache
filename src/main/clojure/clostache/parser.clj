@@ -41,24 +41,47 @@
                                  "(\r\n|[\r\n]|$)") "$1" true]
                            [comment-regex ""]])))
 
+(defn- find-section-start-tag
+  "Find the next section start tag, starting to search at index."
+  [template index]
+  (let [start-tag (.indexOf template "{{#" index)]
+    (if (= start-tag -1)
+      (.indexOf template "{{^" index)
+      start-tag)))
+
+(defn- find-section-end-tag
+  "Find the matching end tag for a section at the specified level,
+   starting to search at index."
+  [template index level]
+  (let [next-start (find-section-start-tag template index)
+        next-end (.indexOf template "{{/" index)]
+    (if (= next-end -1)
+      -1
+      (if (and (not (= next-start -1)) (< next-start next-end))
+        (find-section-end-tag template (+ next-start 3) (inc level))
+        (if (= level 1)
+          next-end
+          (find-section-end-tag template (+ next-end 3) (dec level)))))))
+
 (defn- extract-section
   "Extracts the outer section from the template."
   [template]
   (let [start (.indexOf template "{{#")
-        start-inverted (.indexOf template "{{^")
-        end-tag (.indexOf template "{{/" start)
-        end (+ (.indexOf template "}}" end-tag) 2)]
-    (if (or (and (= start -1) (= start-inverted -1))
-            (= end 1))
+        start-inverted (.indexOf template "{{^")]
+    (if (and (= start -1) (= start-inverted -1))
       nil
       (let [inverted (= start -1)
             start (if inverted start-inverted start)
-            section (.substring template start end)
-            body-start (+ (.indexOf section "}}") 2)
-            body-end (.lastIndexOf section "{{")
-            body (.substring section body-start body-end)
-            section-name (.trim (.substring section 3 (- body-start 2)))]
-        (Section. section-name body start end inverted)))))
+            end-tag (find-section-end-tag template (+ start 3) 1)]
+        (if (= end-tag -1)
+          nil
+          (let [end (+ (.indexOf template "}}" end-tag) 2)
+                section (.substring template start end)
+                body-start (+ (.indexOf section "}}") 2)
+                body-end (.lastIndexOf section "{{")
+                body (.substring section body-start body-end)
+                section-name (.trim (.substring section 3 (- body-start 2)))]
+            (Section. section-name body start end inverted)))))))
 
 (defn- remove-all-tags
   "Removes all tags from the template."

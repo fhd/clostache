@@ -34,9 +34,8 @@
 ;; (deftest test-delimiters
 ;;   (run-spec-tests "delimiters"))
 
-;; TODO: Uncomment when nested sections work
-;; (deftest test-interpolation
-;;   (run-spec-tests "interpolation"))
+(deftest test-interpolation
+  (run-spec-tests "interpolation"))
 
 ;; TODO: Test the following specs:
 ;; - inverted
