@@ -37,7 +37,9 @@
 (deftest test-interpolation
   (run-spec-tests "interpolation"))
 
+(deftest test-sections
+  (run-spec-tests "sections"))
+
 ;; TODO: Test the following specs:
 ;; - inverted
-;; - sections
 ;; - partials
