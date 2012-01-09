@@ -12,8 +12,8 @@
         data (yaml/parse-string (slurp path))]
     (:tests data)))
 
-(defn- flatten [s]
-  (.replaceAll (.replaceAll s "\n" "\\n") "\r" "\\r"))
+(defn- flatten-string [s]
+  (.replaceAll (.replaceAll s "\n" "\\\\n") "\r" "\\\\r"))
 
 (defn run-spec-test [spec-test]
   (let [template (:template spec-test)
@@ -21,7 +21,7 @@
     (is (= (:expected spec-test)
            (render template data))
         (str (:name spec-test) " - " (:desc spec-test) "\nTemplate: \""
-             (flatten template) "\"\nData: " data))))
+             (flatten-string template) "\"\nData: " data))))
 
 (defn run-spec-tests [spec]
   (doseq [spec-test (load-spec-tests spec)]
