@@ -63,6 +63,34 @@
           next-end
           (find-section-end-tag template (+ next-end 3) (dec level)))))))
 
+(defn- next-non-empty-line
+  "Return the next index that isn't on an empty line."
+  [section index]
+  (if (= index -1)
+    -1
+    (let [s (.substring section index)
+         matcher (re-matcher #"[^\n]" s)]
+     (if (nil? (re-find matcher))
+       -1
+       (+ index (.start (.toMatchResult matcher)))))))
+
+(defn- reverse-str
+  "Reverse all characters in a string"
+  [s]
+  (apply str (reverse s)))
+
+(defn- previous-non-empty-line
+  "Return the next index smaller than the supplied index that isn't on an empty
+   line."
+  [section index]
+  (if (= index -1)
+    -1
+    (let [reverse-index (next-non-empty-line
+                         (reverse-str (.substring section 0 index)) 0)]
+      (if (= reverse-index -1)
+        -1
+        (- index reverse-index)))))
+
 (defn- extract-section
   "Extracts the outer section from the template."
   [template]
@@ -77,10 +105,16 @@
           nil
           (let [end (+ (.indexOf template "}}" end-tag) 2)
                 section (.substring template start end)
-                body-start (+ (.indexOf section "}}") 2)
-                body-end (.lastIndexOf section "{{")
-                body (.substring section body-start body-end)
-                section-name (.trim (.substring section 3 (- body-start 2)))]
+                start-tag-end (+ (.indexOf section "}}") 2)
+                body-start (next-non-empty-line section start-tag-end)
+                body-end (previous-non-empty-line section
+                                                  (.lastIndexOf section "{{"))
+                body (if (or (= body-start -1) (= body-end -1)
+                             (< body-end body-start))
+                       ""
+                       (.substring section body-start body-end))
+                section-name (.trim (.substring section 3
+                                                (- start-tag-end 2)))]
             (Section. section-name body start end inverted)))))))
 
 (defn- remove-all-tags
@@ -148,7 +182,7 @@
   "Converts tags with dotted tag names to nested sections."
   [template]
   (loop [s template]
-    (let [matcher (re-matcher #"(\{\{[\{&]?)([^\}]*\.[^\}]*)(\}{2,3})" s)]
+    (let [matcher (re-matcher #"(\{\{[\{&]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
       (if-let [match (re-find matcher)]
         (let [match-result (.toMatchResult matcher)
               match-start (.start match-result)
@@ -186,7 +220,8 @@
                                              (map? section-data))
                                        section-data {})
                         section-data (if (sequential? section-data) section-data
-                                         [section-data])]
+                                         [section-data])
+                        section-data (map #(conj data %) section-data)]
                     (map-str (fn [m]
                                (render (:body section) m)) section-data))))
               after) data)))))
