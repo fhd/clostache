@@ -143,44 +143,60 @@
                   (recur match-end))))))))
   (.toString builder)))
 
+(defn- path-data
+  "Extract the data for the supplied path"
+  [elements data]
+  (loop [i 0
+         d data]
+    (let [element (nth elements i)
+          value ((keyword element) d)]
+      (if (or (nil? value))
+        nil
+        (let [next (inc i)]
+          (if (= next (count elements))
+            value
+            (recur next value)))))))
+
 (defn- convert-path
   "Convert a tag with a dotted name to nested sections, using the
   supplied delimiters to access the value."
-  [tag open-delim close-delim]
+  [tag open-delim close-delim data]
   (let [builder (StringBuilder.)
         tail-builder (StringBuilder.)
         elements (split #"\." tag)]
-    (doseq [element (butlast elements)]
-      (.append builder (str "{{#" element "}}"))
-      (.insert tail-builder 0 (str "{{/" element "}}")))
-    (.append builder (str open-delim (last elements) close-delim))
-    (str (.toString builder) (.toString tail-builder))))
+    (if (nil? (path-data elements data))
+      ""
+      (do
+        (doseq [element (butlast elements)]
+          (.append builder (str "{{#" element "}}"))
+          (.insert tail-builder 0 (str "{{/" element "}}")))
+        (.append builder (str open-delim (last elements) close-delim))
+        (str (.toString builder) (.toString tail-builder))))))
 
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
-  [template]
+  [template data]
   (loop [s template]
     (let [matcher (re-matcher #"(\{\{[\{&]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
       (if-let [match (re-find matcher)]
-        (let [match-result (.toMatchResult matcher)
-              match-start (.start match-result)
-              match-end (.end match-result)
+        (let [match-start (.start matcher)
+              match-end (.end matcher)
               converted (convert-path (nth match 2) (nth match 1)
-                                      (nth match 3))]
+                                      (nth match 3) data)]
           (recur (str (.substring s 0 match-start) converted
                       (.substring s match-end))))
         s))))
 
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
-  [template]
-  (convert-paths (remove-comments (process-set-delimiters template))))
+  [template data]
+  (convert-paths (remove-comments (process-set-delimiters template)) data))
 
 (defn render
   "Renders the template with the data."
   [template data]
   (let [replacements (create-variable-replacements data)
-        template (preprocess template)
+        template (preprocess template data)
         section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))
