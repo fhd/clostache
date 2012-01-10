@@ -41,13 +41,23 @@
                                  "(\r\n|[\r\n]|$)") "$1" true]
                            [comment-regex ""]])))
 
+(defn- next-index
+  "Return the next index of the supplied regex."
+  ([section regex]
+     (next-index section regex 0))
+  ([section regex index]
+     (if (= index -1)
+       -1
+       (let [s (.substring section index)
+             matcher (re-matcher regex s)]
+         (if (nil? (re-find matcher))
+           -1
+           (+ index (.start (.toMatchResult matcher))))))))
+
 (defn- find-section-start-tag
   "Find the next section start tag, starting to search at index."
   [template index]
-  (let [start-tag (.indexOf template "{{#" index)]
-    (if (= start-tag -1)
-      (.indexOf template "{{^" index)
-      start-tag)))
+  (next-index template #"\{\{[#\^]" index))
 
 (defn- find-section-end-tag
   "Find the matching end tag for a section at the specified level,
@@ -63,58 +73,26 @@
           next-end
           (find-section-end-tag template (+ next-end 3) (dec level)))))))
 
-(defn- next-non-empty-line
-  "Return the next index that isn't on an empty line."
-  [section index]
-  (if (= index -1)
-    -1
-    (let [s (.substring section index)
-         matcher (re-matcher #"[^\n]" s)]
-     (if (nil? (re-find matcher))
-       -1
-       (+ index (.start (.toMatchResult matcher)))))))
-
-(defn- reverse-str
-  "Reverse all characters in a string"
-  [s]
-  (apply str (reverse s)))
-
-(defn- previous-non-empty-line
-  "Return the next index smaller than the supplied index that isn't on an empty
-   line."
-  [section index]
-  (if (= index -1)
-    -1
-    (let [reverse-index (next-non-empty-line
-                         (reverse-str (.substring section 0 index)) 0)]
-      (if (= reverse-index -1)
-        -1
-        (- index reverse-index)))))
-
 (defn- extract-section
   "Extracts the outer section from the template."
   [template]
-  (let [start (.indexOf template "{{#")
-        start-inverted (.indexOf template "{{^")]
-    (if (and (= start -1) (= start-inverted -1))
+  (let [start (find-section-start-tag template 0)]
+    (if (= start -1)
       nil
-      (let [inverted (= start -1)
-            start (if inverted start-inverted start)
+      (let [inverted (= (str (.charAt template (+ start 2))) "^")
             end-tag (find-section-end-tag template (+ start 3) 1)]
         (if (= end-tag -1)
           nil
           (let [end (+ (.indexOf template "}}" end-tag) 2)
                 section (.substring template start end)
-                start-tag-end (+ (.indexOf section "}}") 2)
-                body-start (next-non-empty-line section start-tag-end)
-                body-end (previous-non-empty-line section
-                                                  (.lastIndexOf section "{{"))
+                body-start (+ (.indexOf section "}}") 2)
+                body-end (.lastIndexOf section "{{")
                 body (if (or (= body-start -1) (= body-end -1)
                              (< body-end body-start))
                        ""
                        (.substring section body-start body-end))
                 section-name (.trim (.substring section 3
-                                                (- start-tag-end 2)))]
+                                                (.indexOf section "}}")))]
             (Section. section-name body start end inverted)))))))
 
 (defn- remove-all-tags
