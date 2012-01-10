@@ -187,10 +187,27 @@
                       (.substring s match-end))))
         s))))
 
+(defn- join-standalone-section-tags
+  "Remove newlines after standalone (i.e. on their own line) section tags."
+  [template]
+  (replace-all
+   template
+   (let [eol-start "(\r\n|[\r\n]|^)"
+         eol-end "(\r\n|[\r\n]|$)"]
+     [[(str eol-start
+            "\\{\\{[#\\^][^\\}]*\\}\\}(\r\n|[\r\n])\\{\\{/[^\\}]*\\}\\}"
+            eol-end)
+       "$1" true]
+      [(str eol-start "[ \t]*(\\{\\{[#\\^/][^\\}]*\\}\\})" eol-end) "$1$2"
+       true]])))
+
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
   [template data]
-  (convert-paths (remove-comments (process-set-delimiters template)) data))
+  (convert-paths (remove-comments
+                  (process-set-delimiters
+                   (join-standalone-section-tags template)))
+                 data))
 
 (defn render
   "Renders the template with the data."
