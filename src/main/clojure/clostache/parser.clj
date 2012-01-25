@@ -209,6 +209,29 @@
                    (join-standalone-section-tags template)))
                  data))
 
+(declare render)
+
+(defn- render-section
+  [section data]
+  (let [section-data ((keyword (:name section)) data)]
+    (if (:inverted section)
+      (if (or (and (sequential? section-data) (empty? section-data))
+              (not section-data))
+        (:body section))
+      (if section-data
+        (let [section-data (if (or (sequential? section-data)
+                                   (map? section-data))
+                             section-data {})
+              section-data (if (sequential? section-data) section-data
+                               [section-data])
+              section-data (if (map? (first section-data))
+                             section-data
+                             (map (fn [e] {(keyword ".") e})
+                                  section-data))
+              section-data (map #(conj data %) section-data)]
+          (map-str (fn [m]
+                     (render (:body section) m)) section-data))))))
+
 (defn render
   "Renders the template with the data."
   [template data]
@@ -218,21 +241,5 @@
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))
       (let [before (.substring template 0 (:start section))
-            after (.substring template (:end section))
-            section-data ((keyword (:name section)) data)]
-        (recur
-         (str before
-              (if (:inverted section)
-                (if (or (and (sequential? section-data) (empty? section-data))
-                        (not section-data))
-                  (:body section))
-                (if section-data
-                  (let [section-data (if (or (sequential? section-data)
-                                             (map? section-data))
-                                       section-data {})
-                        section-data (if (sequential? section-data) section-data
-                                         [section-data])
-                        section-data (map #(conj data %) section-data)]
-                    (map-str (fn [m]
-                               (render (:body section) m)) section-data))))
-              after) data)))))
+            after (.substring template (:end section))]
+        (recur (str before (render-section section data) after) data)))))
