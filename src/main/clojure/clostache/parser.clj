@@ -161,23 +161,30 @@
   "Convert a tag with a dotted name to nested sections, using the
   supplied delimiters to access the value."
   [tag open-delim close-delim data]
-  (let [builder (StringBuilder.)
-        tail-builder (StringBuilder.)
+  (let [tag-type (last open-delim)
+        section-tag (some #{tag-type} [\# \/])
+        section-end-tag (= tag-type \/)
+        builder (StringBuilder.)
+        tail-builder (if section-tag nil (StringBuilder.))
         elements (split #"\." tag)]
-    (if (nil? (path-data elements data))
+    (if (and (not section-tag) (nil? (path-data elements data)))
       ""
-      (do
-        (doseq [element (butlast elements)]
-          (.append builder (str "{{#" element "}}"))
-          (.insert tail-builder 0 (str "{{/" element "}}")))
-        (.append builder (str open-delim (last elements) close-delim))
-        (str (.toString builder) (.toString tail-builder))))))
+      (let [elements (if section-end-tag (reverse elements) elements)]
+        (do
+          (doseq [element (butlast elements)]
+            (.append builder (str "{{" (if section-end-tag "/" "#") element
+                                  "}}"))
+            (if (not (nil? tail-builder))
+              (.insert tail-builder 0 (str "{{/" element "}}"))))
+          (.append builder (str open-delim (last elements) close-delim))
+          (str (.toString builder) (if (not (nil? tail-builder))
+                                     (.toString tail-builder))))))))
 
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
   [template data]
   (loop [s template]
-    (let [matcher (re-matcher #"(\{\{[\{&]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
+    (let [matcher (re-matcher #"(\{\{[\{&#/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
       (if-let [match (re-find matcher)]
         (let [match-start (.start matcher)
               match-end (.end matcher)
