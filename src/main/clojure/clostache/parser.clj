@@ -223,7 +223,7 @@
         (recur
          (str before
               (if (:inverted section)
-                (if (or (and (vector? section-data) (empty? section-data))
+                (if (or (and (sequential? section-data) (empty? section-data))
                         (not section-data))
                   (:body section))
                 (if section-data
