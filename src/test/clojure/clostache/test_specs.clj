@@ -40,6 +40,8 @@
 (deftest test-sections
   (run-spec-tests "sections"))
 
+(deftest test-inverted
+  (run-spec-tests "inverted"))
+
 ;; TODO: Test the following specs:
-;; - inverted
 ;; - partials
