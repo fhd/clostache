@@ -150,30 +150,40 @@
          d data]
     (let [element (nth elements i)
           value ((keyword element) d)]
-      (if (or (nil? value))
+      (if (nil? value)
         nil
-        (let [next (inc i)]
-          (if (= next (count elements))
+        (let [next-i (inc i)]
+          (if (= next-i (count elements))
             value
-            (recur next value)))))))
+            (recur next-i value)))))))
 
 (defn- convert-path
   "Convert a tag with a dotted name to nested sections, using the
   supplied delimiters to access the value."
   [tag open-delim close-delim data]
   (let [tag-type (last open-delim)
-        section-tag (some #{tag-type} [\# \/])
+        section-tag (some #{tag-type} [\# \^ \/])
         section-end-tag (= tag-type \/)
         builder (StringBuilder.)
         tail-builder (if section-tag nil (StringBuilder.))
-        elements (split #"\." tag)]
+        elements (split #"\." tag)
+        element-to-invert (if (= tag-type \^)
+                            (loop [path [(first elements)]
+                                   remaining-elements (rest elements)]
+                              (if (not (empty? remaining-elements))
+                                (if (nil? (path-data path data))
+                                  (last path)
+                                  (recur (conj path (first remaining-elements))
+                                         (next remaining-elements))))))]
     (if (and (not section-tag) (nil? (path-data elements data)))
       ""
       (let [elements (if section-end-tag (reverse elements) elements)]
         (do
           (doseq [element (butlast elements)]
-            (.append builder (str "{{" (if section-end-tag "/" "#") element
-                                  "}}"))
+            (.append builder (str "{{" (if section-end-tag "/"
+                                           (if (= element element-to-invert)
+                                             "^" "#"))
+                                  element "}}"))
             (if (not (nil? tail-builder))
               (.insert tail-builder 0 (str "{{/" element "}}"))))
           (.append builder (str open-delim (last elements) close-delim))
@@ -184,7 +194,7 @@
   "Converts tags with dotted tag names to nested sections."
   [template data]
   (loop [s template]
-    (let [matcher (re-matcher #"(\{\{[\{&#/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
+    (let [matcher (re-matcher #"(\{\{[\{&#\^/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
       (if-let [match (re-find matcher)]
         (let [match-start (.start matcher)
               match-end (.end matcher)
