@@ -141,7 +141,7 @@
                   (.replace builder match-start match-end
                             (str "{{" (second tag) "}}"))
                   (recur match-end))))))))
-  (.toString builder)))
+    (.toString builder)))
 
 (defn- path-data
   "Extract the data for the supplied path"
