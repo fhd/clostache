@@ -1,6 +1,7 @@
 1.0.0
 ==================
 * Added support for dotted variable names.
+* Added support for implicit iterators.
 
 0.6.0 (2011-10-28)
 ==================
