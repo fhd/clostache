@@ -249,14 +249,24 @@
           (map-str (fn [m]
                      (render (:body section) m)) section-data))))))
 
+(defn- resolve-partials
+  "Resolve partials within the template."
+  [template partials]
+  (replace-all template (apply concat
+                               (for [k (keys partials)]
+                                 [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
+                                   (str (k partials))]]))))
+
 (defn render
-  "Renders the template with the data."
-  [template data]
-  (let [replacements (create-variable-replacements data)
-        template (preprocess template data)
-        section (extract-section template)]
-    (if (nil? section)
-      (remove-all-tags (replace-all template replacements))
-      (let [before (.substring template 0 (:start section))
-            after (.substring template (:end section))]
-        (recur (str before (render-section section data) after) data)))))
+  "Renders the template with the data and, if supplied, partials."
+  ([template data partials]
+     (render (resolve-partials template partials) data))
+  ([template data]
+     (let [replacements (create-variable-replacements data)
+           template (preprocess template data)
+           section (extract-section template)]
+       (if (nil? section)
+         (remove-all-tags (replace-all template replacements))
+         (let [before (.substring template 0 (:start section))
+               after (.substring template (:end section))]
+           (recur (str before (render-section section data) after) data))))))
