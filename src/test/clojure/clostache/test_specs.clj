@@ -17,9 +17,10 @@
 
 (defn run-spec-test [spec-test]
   (let [template (:template spec-test)
-        data (:data spec-test)]
+        data (:data spec-test)
+        partials (:partials spec-test)]
     (is (= (:expected spec-test)
-           (render template data))
+           (render template data partials))
         (str (:name spec-test) " - " (:desc spec-test) "\nTemplate: \""
              (flatten-string template) "\"\nData: " data))))
 
@@ -43,5 +44,5 @@
 (deftest test-inverted
   (run-spec-tests "inverted"))
 
-;; TODO: Test the following specs:
-;; - partials
+(deftest test-partials
+  (run-spec-tests "partials"))
