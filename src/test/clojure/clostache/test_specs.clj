@@ -22,7 +22,8 @@
     (is (= (:expected spec-test)
            (render template data partials))
         (str (:name spec-test) " - " (:desc spec-test) "\nTemplate: \""
-             (flatten-string template) "\"\nData: " data))))
+             (flatten-string template) "\"\nData: " data
+             (if partials (str "\nPartials: " partials))))))
 
 (defn run-spec-tests [spec]
   (doseq [spec-test (load-spec-tests spec)]
