@@ -33,6 +33,15 @@
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
                (escape-html var-value)]]))))
 
+(defn- resolve-partials
+  "Resolve partials within the template."
+  [template partials]
+  (let [replacements (apply concat
+                            (for [k (keys partials)]
+                              [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
+                                (str (k partials))]]))]
+    (replace-all template replacements)))
+
 (defn- remove-comments
   "Removes comments from the template."
   [template]
@@ -220,16 +229,17 @@
 
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
-  [template data]
-  (convert-paths (remove-comments
-                  (process-set-delimiters
-                   (join-standalone-section-tags template)))
+  [template data partials]
+  (convert-paths (resolve-partials (remove-comments
+                                    (process-set-delimiters
+                                     (join-standalone-section-tags template)))
+                                   partials)
                  data))
 
 (declare render)
 
 (defn- render-section
-  [section data]
+  [section data partials]
   (let [section-data ((keyword (:name section)) data)]
     (if (:inverted section)
       (if (or (and (sequential? section-data) (empty? section-data))
@@ -247,26 +257,19 @@
                                   section-data))
               section-data (map #(conj data %) section-data)]
           (map-str (fn [m]
-                     (render (:body section) m)) section-data))))))
-
-(defn- resolve-partials
-  "Resolve partials within the template."
-  [template partials]
-  (replace-all template (apply concat
-                               (for [k (keys partials)]
-                                 [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
-                                   (str (k partials))]]))))
+                     (render (:body section) m partials)) section-data))))))
 
 (defn render
   "Renders the template with the data and, if supplied, partials."
-  ([template data partials]
-     (render (resolve-partials template partials) data))
   ([template data]
+     (render template data {}))
+  ([template data partials]
      (let [replacements (create-variable-replacements data)
-           template (preprocess template data)
+           template (preprocess template data partials)
            section (extract-section template)]
        (if (nil? section)
          (remove-all-tags (replace-all template replacements))
          (let [before (.substring template 0 (:start section))
                after (.substring template (:end section))]
-           (recur (str before (render-section section data) after) data))))))
+           (recur (str before (render-section section data partials) after) data
+                  partials))))))
