@@ -36,8 +36,7 @@
 (defn- indent-partial
   "Indent all lines of the partial by indent"
   [partial indent]
-  (replace-all partial [["(\r\n|[\r\n])$" ""]
-                        ["(\r\n|[\r\n])" (str "$1" indent) true]]))
+  (replace-all partial [["(\r\n|[\r\n])(.+)" (str "$1" indent "$2") true]]))
 
 (defn- create-partial-replacements
   "Creates pairs of partial replacements."
@@ -240,7 +239,8 @@
        "$1" true]
       [(str eol-start "[ \t]*(\\{\\{[#\\^/][^\\}]*\\}\\})" eol-end) "$1$2"
        true]
-      [(str eol-start "(\\{\\{>\\s*[^\\}]*\\}\\})" eol-end) "$1$2" true]])))
+      [(str eol-start "([ \t]*\\{\\{>\\s*[^\\}]*\\s*\\}\\})" eol-end) "$1$2"
+       true]])))
 
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
