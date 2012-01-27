@@ -148,7 +148,8 @@
                 match-end (.end match-result)
                 match (.substring string match-start match-end)]
             (if-let [delim-change (re-find
-                                   (re-pattern (str @open-delim "=(.*?) (.*?)="
+                                   (re-pattern (str @open-delim
+                                                    "=\\s*(.*?) (.*?)\\s*="
                                                     @close-delim))
                                    match)]
               (do
