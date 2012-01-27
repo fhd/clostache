@@ -3,7 +3,7 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-**Please note:** The groupId has changed in 0.5, please update your dependencies.
+Compliant with the [mustache spec](http://github.com/mustache/spec) since version 1.0.
 
 Usage
 -----
@@ -226,6 +226,12 @@ Data:
 Output:
 
 	Hello, Felix!
+
+Running the spec tests
+----------------------
+
+	submodule update --init
+	mvn test
 
 License
 -------
