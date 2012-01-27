@@ -148,6 +148,85 @@ Output:
 
 	<h2>Felix' section</h2>
 
+### Dotted names ###
+
+Dotted names are a shorter and more convenient way of accessing nested
+variables or sections.
+
+Template:
+
+	{{greeting.text}}
+
+Data:
+
+	{:greeting {:text "Hello, World"}}
+
+Output:
+
+	Hello, World
+
+### Implicit iterators ###
+
+Implicit iterators allow you to iterate over a one dimensional list of
+elements.
+
+Template:
+
+	<ul>
+	{#names}}
+	    <li>{{.}}</li>
+	{{/names}}
+	</ul>
+
+Data:
+
+	{:names ["Felix" "Jenny"]}
+
+Output:
+
+	<ul>
+	    <li>Felix</li>
+	    <li<Jenny</li>
+	</ul>
+
+### Partials ###
+
+Partials allow you to include other templates (e.g. from separate files).
+
+Template:
+
+	Hello{{>names}}!
+
+Data:
+
+	{:people [{:name "Felix"} {:name "Jenny"}]}
+
+Partials:
+
+	{:names "{{#people}}, {{name}}{{/people}}"}
+
+Output:
+
+	Hello, Felix, Jenny!
+
+### Set delimiters ###
+
+You don't have to use mustaches, you can change the delimiters to
+anything you like.
+
+Template:
+
+	{{=<% %>=}}
+	Hello, <%name%>!
+
+Data:
+
+	{:name "Felix"}
+
+Output:
+
+	Hello, Felix!
+
 License
 -------
 
