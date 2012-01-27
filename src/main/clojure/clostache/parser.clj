@@ -164,6 +164,16 @@
                   (recur match-end))))))))
     (.toString builder)))
 
+(defn- join-standalone-delimiter-tags
+  "Remove newlines after standalone (i.e. on their own line) delimiter tags."
+  [template]
+  (replace-all
+   template
+   (let [eol-start "(\r\n|[\r\n]|^)"
+         eol-end "(\r\n|[\r\n]|$)"]
+     [[(str eol-start "[ \t]*(\\{\\{=[^\\}]*\\}\\})" eol-end) "$1$2"
+       true]])))
+
 (defn- path-data
   "Extract the data for the supplied path"
   [elements data]
@@ -245,11 +255,14 @@
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
   [template data partials]
-  (convert-paths (include-partials (remove-comments
-                                    (process-set-delimiters
-                                     (join-standalone-tags template)))
-                                   partials)
-                 data))
+  (convert-paths
+   (include-partials
+    (remove-comments
+     (join-standalone-tags
+      (process-set-delimiters
+       (join-standalone-delimiter-tags template))))
+    partials)
+   data))
 
 (declare render)
 
