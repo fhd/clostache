@@ -38,6 +38,62 @@
   [partial indent]
   (replace-all partial [["(\r\n|[\r\n])(.+)" (str "$1" indent "$2") true]]))
 
+(defn- escape-regex
+  "Escapes characters that have special meaning in regular expressions."
+  [regex]
+  (let [chars-to-escape ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"]]
+    (replace-all regex (map #(repeat 2 (str "\\" %)) chars-to-escape))))
+
+(defn- process-set-delimiters
+  "Replaces custom set delimiters with mustaches."
+  [template]
+  (let [builder (StringBuilder. template)
+        open-delim (atom "\\{\\{")
+        close-delim (atom "\\}\\}")
+        set-delims (fn [open close]
+                     (doseq [[var delim]
+                             [[open-delim open] [close-delim close]]]
+                       (swap! var (constantly (escape-regex delim)))))]
+    (loop [offset 0]
+      (let [string (.toString builder)
+            custom-delim (not (= "\\{\\{" @open-delim))
+            matcher (re-matcher
+                     (re-pattern (str "(" @open-delim ".*?" @close-delim
+                                      (if custom-delim
+                                        (str "|\\{\\{.*?\\}\\}"))
+                                      ")"))
+                     string)]
+        (if (.find matcher offset)
+          (let [match-result (.toMatchResult matcher)
+                match-start (.start match-result)
+                match-end (.end match-result)
+                match (.substring string match-start match-end)]
+            (if (and custom-delim
+                     (= "{{" (.substring string match-start (+ match-start 2))))
+              (if-let [tag (re-find #"\{\{(.*?)\}\}" match)]
+                (do
+                  (.replace builder match-start match-end
+                            (str "\\{\\{" (second tag) "\\}\\}"))
+                  (recur match-end)))
+              (if-let [delim-change (re-find
+                                     (re-pattern (str @open-delim
+                                                      "=\\s*(.*?) (.*?)\\s*="
+                                                      @close-delim))
+                                     match)]
+                (do
+                  (apply set-delims (rest delim-change))
+                  (.delete builder match-start match-end)
+                  (recur match-start))
+                (if-let [tag (re-find
+                              (re-pattern (str @open-delim "(.*?)"
+                                               @close-delim))
+                              match)]
+                  (do
+                    (.replace builder match-start match-end
+                              (str "{{" (second tag) "}}"))
+                    (recur match-end)))))))))
+    (.toString builder)))
+
 (defn- create-partial-replacements
   "Creates pairs of partial replacements."
   [template partials]
@@ -47,7 +103,8 @@
                                         (name k) "\\s*\\}\\}"))
                  indent (nth (first (re-seq (re-pattern regex) template)) 2)]
              [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
-               (indent-partial (str (k partials)) indent)]]))))
+               (process-set-delimiters (indent-partial (str (k partials))
+                                                       indent))]]))))
 
 (defn- include-partials
   "Include partials within the template."
@@ -120,50 +177,6 @@
   "Removes all tags from the template."
   [template]
   (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
-
-(defn- escape-regex
-  "Escapes characters that have special meaning in regular expressions."
-  [regex]
-  (let [chars-to-escape ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"]]
-    (replace-all regex (map #(repeat 2 (str "\\" %)) chars-to-escape))))
-
-(defn- process-set-delimiters
-  "Replaces custom set delimiters with mustaches."
-  [template]
-  (let [builder (StringBuilder. template)
-        open-delim (atom "\\{\\{")
-        close-delim (atom "\\}\\}")
-        set-delims (fn [open close]
-                     (doseq [[var delim]
-                             [[open-delim open] [close-delim close]]]
-                       (swap! var (constantly (escape-regex delim)))))]
-    (loop [offset 0]
-      (let [string (.toString builder)
-            matcher (re-matcher
-                     (re-pattern (str @open-delim ".*?" @close-delim))
-                     string)]
-        (if (.find matcher offset)
-          (let [match-result (.toMatchResult matcher)
-                match-start (.start match-result)
-                match-end (.end match-result)
-                match (.substring string match-start match-end)]
-            (if-let [delim-change (re-find
-                                   (re-pattern (str @open-delim
-                                                    "=\\s*(.*?) (.*?)\\s*="
-                                                    @close-delim))
-                                   match)]
-              (do
-                (apply set-delims (rest delim-change))
-                (.delete builder match-start match-end)
-                (recur match-start))
-              (if-let [tag (re-find
-                            (re-pattern (str @open-delim "(.*?)" @close-delim))
-                            match)]
-                (do
-                  (.replace builder match-start match-end
-                            (str "{{" (second tag) "}}"))
-                  (recur match-end))))))))
-    (.toString builder)))
 
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
@@ -265,7 +278,7 @@
     partials)
    data))
 
-(declare render)
+(declare render-template)
 
 (defn- render-section
   [section data partials]
@@ -286,19 +299,27 @@
                                   section-data))
               section-data (map #(conj data %) section-data)]
           (map-str (fn [m]
-                     (render (:body section) m partials)) section-data))))))
+                     (render-template (:body section) m partials))
+                   section-data))))))
+
+(defn- render-template
+  "Renders the template with the data and partials."
+  [template data partials]
+  (let [replacements (create-variable-replacements data)
+        template (preprocess template data partials)
+        section (extract-section template)]
+    (if (nil? section)
+      (remove-all-tags (replace-all template replacements))
+      (let [before (.substring template 0 (:start section))
+            after (.substring template (:end section))]
+        (recur (str before (render-section section data partials) after) data
+               partials)))))
 
 (defn render
   "Renders the template with the data and, if supplied, partials."
   ([template data]
      (render template data {}))
   ([template data partials]
-     (let [replacements (create-variable-replacements data)
-           template (preprocess template data partials)
-           section (extract-section template)]
-       (if (nil? section)
-         (remove-all-tags (replace-all template replacements))
-         (let [before (.substring template 0 (:start section))
-               after (.substring template (:end section))]
-           (recur (str before (render-section section data partials) after) data
-                  partials))))))
+     (replace-all (render-template template data partials)
+                  [["\\\\\\{\\\\\\{" "{{"]
+                   ["\\\\\\}\\\\\\}" "}}"]])))
