@@ -3,8 +3,6 @@
         clostache.parser)
   (:require [clj-yaml.core :as yaml]))
 
-;; TODO: Print a warning instead of an exception when the specs are missing
-
 (defn- load-spec-tests [spec]
   (let [path (-> (Thread/currentThread)
                  (.getContextClassLoader)
@@ -27,7 +25,7 @@
 
 (defn run-spec-tests [spec]
   (doseq [spec-test (load-spec-tests spec)]
-          (run-spec-test spec-test)))
+    (run-spec-test spec-test)))
 
 (deftest test-comments
   (run-spec-tests "comments"))
