@@ -33,14 +33,27 @@
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
                (escape-html var-value)]]))))
 
-(defn- resolve-partials
-  "Resolve partials within the template."
+(defn- indent-partial
+  "Indent all lines of the partial by indent"
+  [partial indent]
+  (replace-all partial [["(\r\n|[\r\n])$" ""]
+                        ["(\r\n|[\r\n])" (str "$1" indent) true]]))
+
+(defn- create-partial-replacements
+  "Creates pairs of partial replacements."
   [template partials]
-  (let [replacements (apply concat
-                            (for [k (keys partials)]
-                              [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
-                                (str (k partials))]]))]
-    (replace-all template replacements)))
+  (apply concat
+         (for [k (keys partials)]
+           (let [regex (re-pattern (str "(\r\n|[\r\n]|^)([ \\t]*)\\{\\{>\\s*"
+                                        (name k) "\\s*\\}\\}"))
+                 indent (nth (first (re-seq (re-pattern regex) template)) 2)]
+             [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
+               (indent-partial (str (k partials)) indent)]]))))
+
+(defn- include-partials
+  "Include partials within the template."
+  [template partials]
+  (replace-all template (create-partial-replacements template partials)))
 
 (defn- remove-comments
   "Removes comments from the template."
@@ -232,7 +245,7 @@
 (defn- preprocess
   "Preprocesses the template (e.g. removing comments)."
   [template data partials]
-  (convert-paths (resolve-partials (remove-comments
+  (convert-paths (include-partials (remove-comments
                                     (process-set-delimiters
                                      (join-standalone-tags template)))
                                    partials)
