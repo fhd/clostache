@@ -32,9 +32,8 @@
 (deftest test-comments
   (run-spec-tests "comments"))
 
-;; TODO: Uncomment these when partials are implemented
-;; (deftest test-delimiters
-;;   (run-spec-tests "delimiters"))
+(deftest test-delimiters
+  (run-spec-tests "delimiters"))
 
 (deftest test-interpolation
   (run-spec-tests "interpolation"))
