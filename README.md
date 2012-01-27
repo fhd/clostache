@@ -3,7 +3,7 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-Compliant with the [mustache spec](http://github.com/mustache/spec) since version 1.0.
+Compliant with the [Mustache spec](http://github.com/mustache/spec) since version 1.0.
 
 Usage
 -----
