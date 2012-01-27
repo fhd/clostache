@@ -3,6 +3,7 @@
 * Added support for dotted variable names.
 * Added support for implicit iterators.
 * Added support for partials.
+* Added support for set delimiters.
 
 0.6.0 (2011-10-28)
 ==================
