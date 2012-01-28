@@ -1,3 +1,6 @@
+1.1.0
+==================
+
 1.0.0 (2012-01-28)
 ==================
 * Made Clostache compliant with the Mustache spec.
