@@ -11,6 +11,18 @@ Usage
 The easiest way to use Clostache in your project is via
 [Clojars](http://clojars.org/de.ubercode.clostache/clostache).
 
+Leiningen:
+
+	[de.ubercode.clostache/clostache "1.0.0"]
+
+Maven:
+
+	<dependency>
+	  <groupId>de.ubercode.clostache</groupId>
+	  <artifactId>clostache</artifactId>
+	  <version>1.0.0</version>
+	</dependency>
+
 To install it via [cljr](https://github.com/liebke/cljr), run:
 
 	clrj install de.ubercode.clostache/clostache
