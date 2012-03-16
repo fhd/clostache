@@ -44,3 +44,6 @@
 
 (deftest test-partials
   (run-spec-tests "partials"))
+
+(deftest test-lambdas
+  (run-spec-tests "lambdas"))
