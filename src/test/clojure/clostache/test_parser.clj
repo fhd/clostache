@@ -106,3 +106,7 @@
 (deftest test-render-tag-with-dotted-name-like-section
   (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
                                 {:felix {:name "Felix"}}))))
+
+(deftest test-render-lambda
+  (is (= "Hello, Felix" (render "{{#greet}}Felix{{/greet}}"
+                                {:greet #(str "Hello, " %)}))))

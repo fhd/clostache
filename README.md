@@ -3,7 +3,7 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-Compliant with the [Mustache spec](http://github.com/mustache/spec) since version 1.0.
+Compliant with the [Mustache spec](http://github.com/mustache/spec) since version 1.0. Supporting lambdas since version 1.1.
 
 Usage
 -----
@@ -234,6 +234,22 @@ Template:
 Data:
 
 	{:name "Felix"}
+
+Output:
+
+	Hello, Felix!
+
+### Lambdas ###
+
+When you really need some logic in your template, you can call a function.
+
+Template:
+
+	{{#greet}}Felix{{/greet}}
+
+Data:
+
+	{:greet #(str "Hello, " %)}
 
 Output:
 
