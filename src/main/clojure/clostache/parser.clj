@@ -288,19 +288,21 @@
               (not section-data))
         (:body section))
       (if section-data
-        (let [section-data (if (or (sequential? section-data)
-                                   (map? section-data))
-                             section-data {})
-              section-data (if (sequential? section-data) section-data
-                               [section-data])
-              section-data (if (map? (first section-data))
-                             section-data
-                             (map (fn [e] {(keyword ".") e})
-                                  section-data))
-              section-data (map #(conj data %) section-data)]
-          (map-str (fn [m]
-                     (render-template (:body section) m partials))
-                   section-data))))))
+        (if (fn? section-data)
+          (section-data (:body section))
+          (let [section-data (if (or (sequential? section-data)
+                                     (map? section-data))
+                               section-data {})
+                section-data (if (sequential? section-data) section-data
+                                 [section-data])
+                section-data (if (map? (first section-data))
+                               section-data
+                               (map (fn [e] {(keyword ".") e})
+                                    section-data))
+                section-data (map #(conj data %) section-data)]
+            (map-str (fn [m]
+                       (render-template (:body section) m partials))
+                     section-data)))))))
 
 (defn- render-template
   "Renders the template with the data and partials."
