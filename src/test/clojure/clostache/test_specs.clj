@@ -10,17 +10,29 @@
         data (json/read-json (slurp path))]
     (:tests data)))
 
+(defn- update-lambda-in [data f]
+  (if (contains? data :lambda)
+    (update-in data [:lambda] f)
+    data))
+
+(defn- extract-lambdas [data]
+  (update-lambda-in data #(:clojure %)))
+
+(defn- load-lambdas [data]
+  (update-lambda-in data #(load-string %)))
+
 (defn- flatten-string [s]
   (.replaceAll (.replaceAll s "\n" "\\\\n") "\r" "\\\\r"))
 
 (defn run-spec-test [spec-test]
   (let [template (:template spec-test)
-        data (:data spec-test)
+        readable-data (extract-lambdas (:data spec-test))
+        data (load-lambdas readable-data)
         partials (:partials spec-test)]
     (is (= (:expected spec-test)
            (render template data partials))
         (str (:name spec-test) " - " (:desc spec-test) "\nTemplate: \""
-             (flatten-string template) "\"\nData: " data
+             (flatten-string template) "\"\nData: " readable-data
              (if partials (str "\nPartials: " partials))))))
 
 (defn run-spec-tests [spec]
