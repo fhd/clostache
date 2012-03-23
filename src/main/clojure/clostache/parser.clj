@@ -5,15 +5,7 @@
 
 (defrecord Section [name body start end inverted])
 
-(defn- replace-all
-  "Applies all replacements from the replacement list to the string."
-  [string replacements]
-  (reduce (fn [string [from to dont-quote]]
-            (.replaceAll string from
-                         (if dont-quote to (Matcher/quoteReplacement to))))
-          string replacements))
-
-(defn arity
+(defn- arity
   "Returns the arity of the supplied function."
   [f] 
   (first
@@ -28,11 +20,28 @@
        (concat arity [:more]) 
        arity)))) 
 
-(defn replace-argless-lambdas
-  "Replace lambdas that don't expect arguments with their return value."
-  [data]
-  (zipmap (keys data)
-          (map #(if (and (fn? %) (= (arity %) 0)) (%) %) (vals data))))
+(defn- fn-str
+  "Converts the supplied argument to string.
+   If it is a function with zero arguments, its return value is returned."
+  [x]
+  (str (if (and (fn? x) (= (arity x) 0)) (x) x)))
+
+(defn- replace-all
+  "Applies all replacements from the replacement list to the string.
+   Replacements are a sequence of two element sequences where the first element
+   is the pattern to match and the second is the replacement.
+   If the replacement is a function, its return value will be used as the
+   replacement.
+   An optional third boolean argument can be set to true if the replacement
+   should not be quoted."
+  [string replacements]
+  (reduce (fn [string [from to dont-quote]]
+            (let [replacement (fn-str to)]
+              (.replaceAll (fn-str string) from
+                           (if dont-quote
+                             replacement
+                             (Matcher/quoteReplacement replacement)))))
+          string replacements))
 
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
@@ -48,7 +57,7 @@
   (apply concat
          (for [k (keys data)]
            (let [var-name (name k)
-                 var-value (str (k data))]
+                 var-value (k data)]
              [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
               [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
@@ -328,8 +337,7 @@
 (defn- render-template
   "Renders the template with the data and partials."
   [template data partials]
-  (let [data (replace-argless-lambdas data)
-        replacements (create-variable-replacements data)
+  (let [replacements (create-variable-replacements data)
         template (preprocess template data partials)
         section (extract-section template)]
     (if (nil? section)
