@@ -46,4 +46,4 @@
   (run-spec-tests "partials"))
 
 (deftest test-lambdas
-  (run-spec-tests "lambdas"))
+  (run-spec-tests "~lambdas"))
