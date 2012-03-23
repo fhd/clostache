@@ -108,5 +108,9 @@
                                 {:felix {:name "Felix"}}))))
 
 (deftest test-render-lambda
+  (is (= "Hello, Felix" (render "Hello, {{name}}"
+                                {:name (fn [] "Felix")}))))
+
+(deftest test-render-lambda-with-params
   (is (= "Hello, Felix" (render "{{#greet}}Felix{{/greet}}"
                                 {:greet #(str "Hello, " %)}))))
