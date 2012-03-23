@@ -13,6 +13,27 @@
                          (if dont-quote to (Matcher/quoteReplacement to))))
           string replacements))
 
+(defn arity
+  "Returns the arity of the supplied function."
+  [f] 
+  (first
+   (let [methods (.getDeclaredMethods (class f)) 
+         count-params (fn [m] (map #(count (.getParameterTypes %)) 
+                                   (filter #(= m (.getName %))   
+                                           methods))) 
+         invokes (count-params "invoke") 
+         do-invokes (map dec (count-params "doInvoke")) 
+         arity (sort (distinct (concat invokes do-invokes)))] 
+     (if (seq do-invokes) 
+       (concat arity [:more]) 
+       arity)))) 
+
+(defn replace-argless-lambdas
+  "Replace lambdas that don't expect arguments with their return value."
+  [data]
+  (zipmap (keys data)
+          (map #(if (and (fn? %) (= (arity %) 0)) (%) %) (vals data))))
+
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
   [string]
@@ -307,7 +328,8 @@
 (defn- render-template
   "Renders the template with the data and partials."
   [template data partials]
-  (let [replacements (create-variable-replacements data)
+  (let [data (replace-argless-lambdas data)
+        replacements (create-variable-replacements data)
         template (preprocess template data partials)
         section (extract-section template)]
     (if (nil? section)
