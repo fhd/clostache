@@ -258,7 +258,7 @@ Output:
 Running the spec tests
 ----------------------
 
-	submodule update --init
+	git submodule update --init
 	mvn test
 
 License
