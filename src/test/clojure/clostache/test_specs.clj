@@ -1,13 +1,13 @@
 (ns clostache.test-specs
   (:use clojure.test
         clostache.parser)
-  (:require [clj-yaml.core :as yaml]))
+  (:require [clojure.data.json :as json]))
 
 (defn- load-spec-tests [spec]
   (let [path (-> (Thread/currentThread)
                  (.getContextClassLoader)
-                 (.getResourceAsStream (str "spec/specs/" spec ".yml")))
-        data (yaml/parse-string (slurp path))]
+                 (.getResourceAsStream (str "spec/specs/" spec ".json")))
+        data (json/read-json (slurp path))]
     (:tests data)))
 
 (defn- flatten-string [s]
