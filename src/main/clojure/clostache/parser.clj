@@ -8,17 +8,11 @@
 (defn- arity
   "Returns the arity of the supplied function."
   [f] 
-  (first
-   (let [methods (.getDeclaredMethods (class f)) 
-         count-params (fn [m] (map #(count (.getParameterTypes %)) 
-                                   (filter #(= m (.getName %))   
-                                           methods))) 
-         invokes (count-params "invoke") 
-         do-invokes (map dec (count-params "doInvoke")) 
-         arity (sort (distinct (concat invokes do-invokes)))] 
-     (if (seq do-invokes) 
-       (concat arity [:more]) 
-       arity)))) 
+  (let [methods (.getDeclaredMethods (class f)) 
+        invokes (map #(count (.getParameterTypes %))
+                     (filter #(= "invoke" (.getName %)) methods))
+        arities (sort (distinct invokes))]
+    (first arities)))
 
 (defn- argless-fn?
   "Returns true if x is a function without arguments."
