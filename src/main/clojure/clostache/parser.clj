@@ -43,6 +43,14 @@
                              (Matcher/quoteReplacement replacement)))))
           string replacements))
 
+(defn- extract-argless-lambdas
+  "Extract lambdas that don't expect arguments."
+  [data]
+  (let [lambda-keys (for [[k v] data :when (and (fn? v) (= (arity v) 0))] k)
+        lambdas (select-keys data lambda-keys)
+        filtered-data (apply dissoc (cons data lambda-keys))]
+    [lambdas filtered-data]))
+
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
   [string]
@@ -61,7 +69,19 @@
              [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
               [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
-               (escape-html var-value)]]))))
+               (if (fn? var-value) var-value (escape-html var-value))]]))))
+
+(declare render-template)
+
+(defn- replace-argless-lambdas
+  "Replaces lambdas that don't expect arguments with their return value."
+  [template data partials lambdas]
+  (let [prepared-lambdas (zipmap (keys lambdas)
+                                 (map #(fn []
+                                         (render-template (%) data partials))
+                                      (vals lambdas)))
+        replacements (create-variable-replacements prepared-lambdas)]
+    (replace-all template replacements)))
 
 (defn- indent-partial
   "Indent all lines of the partial by indent"
@@ -308,8 +328,6 @@
     partials)
    data))
 
-(declare render-template)
-
 (defn- render-section
   [section data partials]
   (let [section-data ((keyword (:name section)) data)]
@@ -337,7 +355,9 @@
 (defn- render-template
   "Renders the template with the data and partials."
   [template data partials]
-  (let [replacements (create-variable-replacements data)
+  (let [[lambdas data] (extract-argless-lambdas data)
+        template (replace-argless-lambdas template data partials lambdas)
+        replacements (create-variable-replacements data)
         template (preprocess template data partials)
         section (extract-section template)]
     (if (nil? section)
