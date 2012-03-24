@@ -20,11 +20,16 @@
        (concat arity [:more]) 
        arity)))) 
 
+(defn- argless-fn?
+  "Returns true if x is a function without arguments."
+  [f]
+  (and (fn? f) (= (arity f) 0)))
+
 (defn- fn-str
   "Converts the supplied argument to string.
    If it is a function with zero arguments, its return value is returned."
   [x]
-  (str (if (and (fn? x) (= (arity x) 0)) (x) x)))
+  (str (if (argless-fn? x) (x) x)))
 
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
@@ -43,13 +48,15 @@
                              (Matcher/quoteReplacement replacement)))))
           string replacements))
 
-(defn- extract-argless-lambdas
-  "Extract lambdas that don't expect arguments."
-  [data]
-  (let [lambda-keys (for [[k v] data :when (and (fn? v) (= (arity v) 0))] k)
-        lambdas (select-keys data lambda-keys)
-        filtered-data (apply dissoc (cons data lambda-keys))]
-    [lambdas filtered-data]))
+(declare render-template)
+
+(defn- prepare-argless-lambdas
+  "Prepares functions without arguments so they can be used like variables."
+  [data partials]
+  (into {} (for [[k v] data]
+             [k (if (argless-fn? v)
+                  (fn [] (render-template (v) (dissoc data k) partials))
+                  v)])))
 
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
@@ -70,18 +77,6 @@
               [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
                (if (fn? var-value) var-value (escape-html var-value))]]))))
-
-(declare render-template)
-
-(defn- replace-argless-lambdas
-  "Replaces lambdas that don't expect arguments with their return value."
-  [template data partials lambdas]
-  (let [prepared-lambdas (zipmap (keys lambdas)
-                                 (map #(fn []
-                                         (render-template (%) data partials))
-                                      (vals lambdas)))
-        replacements (create-variable-replacements prepared-lambdas)]
-    (replace-all template replacements)))
 
 (defn- indent-partial
   "Indent all lines of the partial by indent"
@@ -355,8 +350,7 @@
 (defn- render-template
   "Renders the template with the data and partials."
   [template data partials]
-  (let [[lambdas data] (extract-argless-lambdas data)
-        template (replace-argless-lambdas template data partials lambdas)
+  (let [data (prepare-argless-lambdas data partials)
         replacements (create-variable-replacements data)
         template (preprocess template data partials)
         section (extract-section template)]
