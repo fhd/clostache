@@ -79,16 +79,24 @@
   [partial indent]
   (replace-all partial [["(\r\n|[\r\n])(.+)" (str "$1" indent "$2") true]]))
 
+(def regex-chars ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"])
+
 (defn- escape-regex
   "Escapes characters that have special meaning in regular expressions."
   [regex]
-  (let [chars-to-escape ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"]]
-    (replace-all regex (map #(repeat 2 (str "\\" %)) chars-to-escape))))
+  (replace-all regex (map #(repeat 2 (str "\\" %)) regex-chars)))
+
+(defn- unescape-regex
+  "Unescapes characters that have special meaning in regular expressions."
+  [regex]
+  (replace-all regex (map (fn [char] [(str "\\\\\\" char) char true])
+                          regex-chars)))
 
 (defn- process-set-delimiters
   "Replaces custom set delimiters with mustaches."
-  [template]
+  [template data]
   (let [builder (StringBuilder. template)
+        data (atom data)
         open-delim (atom "\\{\\{")
         close-delim (atom "\\}\\}")
         set-delims (fn [open close]
@@ -129,11 +137,31 @@
                               (re-pattern (str @open-delim "(.*?)"
                                                @close-delim))
                               match)]
-                  (do
+                  (let [section-start (re-find (re-pattern
+                                                (str "^"
+                                                     @open-delim
+                                                     "\\s*#\\s*(.*?)\\s*"
+                                                     @close-delim))
+                                               (first tag))
+                        key (if section-start (keyword (second section-start)))
+                        value (if key (key @data))]
+                    (if (and value (fn? value)
+                             (not (and (= @open-delim "\\{\\{")
+                                       (= @close-delim "\\}\\}"))))
+                      (swap! data
+                             #(update-in % [key]
+                                         (fn [old]
+                                           (fn [data]
+                                             (str "{{="
+                                                  (unescape-regex @open-delim)
+                                                  " "
+                                                  (unescape-regex @close-delim)
+                                                  "=}}"
+                                                  (old data)))))))
                     (.replace builder match-start match-end
                               (str "{{" (second tag) "}}"))
                     (recur match-end)))))))))
-    (.toString builder)))
+    [(.toString builder) @data]))
 
 (defn- create-partial-replacements
   "Creates pairs of partial replacements."
@@ -144,8 +172,8 @@
                                         (name k) "\\s*\\}\\}"))
                  indent (nth (first (re-seq (re-pattern regex) template)) 2)]
              [[(str "\\{\\{>\\s*" (name k) "\\s*\\}\\}")
-               (process-set-delimiters (indent-partial (str (k partials))
-                                                       indent))]]))))
+               (first (process-set-delimiters (indent-partial (str (k partials))
+                                                              indent) {}))]]))))
 
 (defn- include-partials
   "Include partials within the template."
@@ -308,16 +336,15 @@
        true]])))
 
 (defn- preprocess
-  "Preprocesses the template (e.g. removing comments)."
+  "Preprocesses template and data (e.g. removing comments)."
   [template data partials]
-  (convert-paths
-   (include-partials
-    (remove-comments
-     (join-standalone-tags
-      (process-set-delimiters
-       (join-standalone-delimiter-tags template))))
-    partials)
-   data))
+  (let [template (join-standalone-delimiter-tags template)
+        [template data] (process-set-delimiters template data)
+        template (join-standalone-tags template)
+        template (remove-comments template)
+        template (include-partials template partials)
+        template (convert-paths template data)]
+    [template data]))
 
 (defn- render-section
   [section data partials]
@@ -348,7 +375,7 @@
   [template data partials]
   (let [data (prepare-argless-lambdas data partials)
         replacements (create-variable-replacements data)
-        template (preprocess template data partials)
+        [template data] (preprocess template data partials)
         section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))
