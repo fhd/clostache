@@ -70,7 +70,9 @@
              [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
               [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
-               (if (fn? var-value) var-value (escape-html var-value))]]))))
+               (if (argless-fn? var-value)
+                 #(escape-html (var-value))
+                 (escape-html var-value))]]))))
 
 (defn- indent-partial
   "Indent all lines of the partial by indent"
