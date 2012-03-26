@@ -19,12 +19,6 @@
   [f]
   (and (fn? f) (= (arity f) 0)))
 
-(defn- fn-str
-  "Converts the supplied argument to string.
-   If it is a function with zero arguments, its return value is returned."
-  [x]
-  (str (if (argless-fn? x) (x) x)))
-
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
    Replacements are a sequence of two element sequences where the first element
@@ -35,8 +29,8 @@
    should not be quoted."
   [string replacements]
   (reduce (fn [string [from to dont-quote]]
-            (let [replacement (fn-str to)]
-              (.replaceAll (fn-str string) from
+            (let [replacement (str (if (argless-fn? to) (to) to))]
+              (.replaceAll (str string) from
                            (if dont-quote
                              replacement
                              (Matcher/quoteReplacement replacement)))))
@@ -66,12 +60,15 @@
   (apply concat
          (for [k (keys data)]
            (let [var-name (name k)
-                 var-value (k data)]
+                 var-value (k data)
+                 var-value (if (fn? var-value) var-value (str var-value))]
              [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
               [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
               [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
-               (if (argless-fn? var-value)
-                 #(escape-html (var-value))
+               (if (fn? var-value)
+                 (if (= (arity var-value) 0)
+                   (fn [] (escape-html (var-value)))
+                   (fn [& args] (escape-html (apply var-value args))))
                  (escape-html var-value))]]))))
 
 (defn- indent-partial
@@ -374,8 +371,8 @@
   "Renders the template with the data and partials."
   [template data partials]
   (let [data (prepare-argless-lambdas data partials)
-        replacements (create-variable-replacements data)
         [template data] (preprocess template data partials)
+        replacements (create-variable-replacements data)
         section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-all template replacements))
