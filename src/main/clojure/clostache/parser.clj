@@ -19,8 +19,6 @@
                            (Matcher/quoteReplacement to))))
           string replacements))
 
-(declare render-template)
-
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
   [string]
@@ -216,6 +214,8 @@
             (recur (.replaceFirst matcher replacement)
                    (+ (.start result) (.length replacement))))
           string)))))
+
+(declare render-template)
 
 (defn replace-variables
   "Replaces variables in the template with their values from the data."
