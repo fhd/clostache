@@ -5,46 +5,21 @@
 
 (defrecord Section [name body start end inverted])
 
-(defn- arity
-  "Returns the arity of the supplied function."
-  [f] 
-  (let [methods (.getDeclaredMethods (class f)) 
-        invokes (map #(count (.getParameterTypes %))
-                     (filter #(= "invoke" (.getName %)) methods))
-        arities (sort (distinct invokes))]
-    (first arities)))
-
-(defn- argless-fn?
-  "Returns true if x is a function without arguments."
-  [f]
-  (and (fn? f) (= (arity f) 0)))
-
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
    Replacements are a sequence of two element sequences where the first element
    is the pattern to match and the second is the replacement.
-   If the replacement is a function, its return value will be used as the
-   replacement.
    An optional third boolean argument can be set to true if the replacement
    should not be quoted."
   [string replacements]
   (reduce (fn [string [from to dont-quote]]
-            (let [replacement (str (if (argless-fn? to) (to) to))]
-              (.replaceAll (str string) from
-                           (if dont-quote
-                             replacement
-                             (Matcher/quoteReplacement replacement)))))
+            (.replaceAll (str string) from
+                         (if dont-quote
+                           to
+                           (Matcher/quoteReplacement to))))
           string replacements))
 
 (declare render-template)
-
-(defn- prepare-argless-lambdas
-  "Prepares functions without arguments so they can be used like variables."
-  [data partials]
-  (into {} (for [[k v] data]
-             [k (if (argless-fn? v)
-                  (fn [] (render-template (v) (dissoc data k) partials))
-                  v)])))
 
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
@@ -54,25 +29,8 @@
                        ["<" "&lt;"]
                        [">" "&gt;"]]))
 
-(defn- create-variable-replacements
-  "Creates pairs of variable replacements from the data."
-  [data]
-  (apply concat
-         (for [k (keys data)]
-           (let [var-name (name k)
-                 var-value (k data)
-                 var-value (if (fn? var-value) var-value (str var-value))]
-             [[(str "\\{\\{\\{\\s*" var-name "\\s*\\}\\}\\}") var-value]
-              [(str "\\{\\{\\&\\s*" var-name "\\s*\\}\\}") var-value]
-              [(str "\\{\\{\\s*" var-name "\\s*\\}\\}")
-               (if (fn? var-value)
-                 (if (= (arity var-value) 0)
-                   (fn [] (escape-html (var-value)))
-                   (fn [& args] (escape-html (apply var-value args))))
-                 (escape-html var-value))]]))))
-
 (defn- indent-partial
-  "Indent all lines of the partial by indent"
+  "Indent all lines of the partial by indent."
   [partial indent]
   (replace-all partial [["(\r\n|[\r\n])(.+)" (str "$1" indent "$2") true]]))
 
@@ -244,6 +202,40 @@
   [template]
   (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
 
+(defn- replace-all-callback
+  "Replaces each occurrence of the regex with the return value of the callback."
+  [string regex callback]
+  (let [pattern (re-pattern regex)]
+    (loop [string (str string)
+           start 0]
+      (let [matcher (re-matcher pattern string)]
+        (if (and (< start (.length string))
+                 (.find matcher start))
+          (let [result (.toMatchResult matcher)
+                replacement (callback (re-groups matcher))]
+            (recur (.replaceFirst matcher replacement)
+                   (+ (.start result) (.length replacement))))
+          string)))))
+
+(defn replace-variables
+  "Replaces variables in the template with their values from the data."
+  [template data partials]
+  (let [regex #"\{\{(\{|\&|)\s*(.*?)\s*\}{2,3}"]
+    (replace-all-callback template regex
+                          #(let [var-name (nth % 2)
+                                 var-value ((keyword var-name) data)
+                                 var-value (if (fn? var-value)
+                                             (render-template
+                                              (var-value)
+                                              (dissoc data var-name)
+                                              partials)
+                                             var-value)
+                                 var-value (Matcher/quoteReplacement
+                                            (str var-value))]
+                             (if (= (second %) "")
+                               (escape-html var-value)
+                               var-value)))))
+
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
   [template]
@@ -255,7 +247,7 @@
        true]])))
 
 (defn- path-data
-  "Extract the data for the supplied path"
+  "Extract the data for the supplied path."
   [elements data]
   (loop [i 0
          d data]
@@ -370,12 +362,10 @@
 (defn- render-template
   "Renders the template with the data and partials."
   [template data partials]
-  (let [data (prepare-argless-lambdas data partials)
-        [template data] (preprocess template data partials)
-        replacements (create-variable-replacements data)
+  (let [[template data] (preprocess template data partials)
         section (extract-section template)]
     (if (nil? section)
-      (remove-all-tags (replace-all template replacements))
+      (remove-all-tags (replace-variables template data partials))
       (let [before (.substring template 0 (:start section))
             after (.substring template (:end section))]
         (recur (str before (render-section section data partials) after) data
