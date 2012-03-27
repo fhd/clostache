@@ -3,7 +3,8 @@ Clostache
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
-Compliant with the [Mustache spec](http://github.com/mustache/spec) since version 1.0. Supporting lambdas since version 1.1.
+Compliant with the [Mustache spec](http://github.com/mustache/spec)
+since version 1.0. Supporting lambdas since version 1.1.
 
 Usage
 -----
@@ -241,18 +242,21 @@ Output:
 
 ### Lambdas ###
 
-When you really need some logic in your template, you can call a function.
+You can call also functions from templates.
 
 Template:
 
+        {{hello}}
 	{{#greet}}Felix{{/greet}}
 
 Data:
 
+        {:hello "Hello, World!"}
 	{:greet #(str "Hello, " %)}
 
 Output:
 
+        Hello, World!
 	Hello, Felix!
 
 Running the spec tests
