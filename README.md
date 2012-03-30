@@ -291,3 +291,4 @@ Contributors
 * [Rory Geoghegan](https://github.com/rgeoghegan)
 * [Santtu Lintervo](https://github.com/santervo)
 * [Pierre-Alexandre St-Jean](https://github.com/pastjean)
+* [Michael Klishin](https://github.com/michaelklishin)
