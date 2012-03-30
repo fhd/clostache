@@ -6,6 +6,9 @@ Clostache
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
 since version 1.0. Supporting lambdas since version 1.1.
 
+Works with Clojure 1.3 since version 1.2. If you want to use Clostache
+in Clojure 1.2 projects, use version 1.1.
+
 Usage
 -----
 
