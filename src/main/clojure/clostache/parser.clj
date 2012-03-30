@@ -1,7 +1,14 @@
 (ns clostache.parser
   "A parser for mustache templates."
-  (:use [clojure.contrib.string :only (map-str split)])
+  (:use [clojure.string :only (split)])
   (:import java.util.regex.Matcher))
+
+(defn- ^String map-str
+  "Apply f to each element of coll, concatenate all results into a
+  String."
+  [f coll]
+  (apply str (map f coll)))
+
 
 (defrecord Section [name body start end inverted])
 
@@ -269,7 +276,7 @@
         section-end-tag (= tag-type \/)
         builder (StringBuilder.)
         tail-builder (if section-tag nil (StringBuilder.))
-        elements (split #"\." tag)
+        elements (split tag #"\.")
         element-to-invert (if (= tag-type \^)
                             (loop [path [(first elements)]
                                    remaining-elements (rest elements)]
