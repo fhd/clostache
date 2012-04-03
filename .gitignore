@@ -1,2 +1,11 @@
 target
 .dir-locals.el
+pom.xml
+*jar
+/lib/
+/classes/
+/targer/
+.lein-failures
+.lein-deps-sum
+TAGS
+checkouts/*
