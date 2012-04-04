@@ -54,7 +54,7 @@
 
 (defn- process-set-delimiters
   "Replaces custom set delimiters with mustaches."
-  [template data]
+  [^String template data]
   (let [builder (StringBuilder. template)
         data (atom data)
         open-delim (atom "\\{\\{")
@@ -152,7 +152,7 @@
   "Return the next index of the supplied regex."
   ([section regex]
      (next-index section regex 0))
-  ([section regex index]
+  ([^String section regex index]
      (if (= index -1)
        -1
        (let [s (.substring section index)
@@ -163,15 +163,15 @@
 
 (defn- find-section-start-tag
   "Find the next section start tag, starting to search at index."
-  [template index]
+  [^String template index]
   (next-index template #"\{\{[#\^]" index))
 
 (defn- find-section-end-tag
   "Find the matching end tag for a section at the specified level,
    starting to search at index."
-  [template index level]
+  [^String template ^long index ^long level]
   (let [next-start (find-section-start-tag template index)
-        next-end (.indexOf template "{{/" index)]
+        next-end (.indexOf ^String template "{{/" index)]
     (if (= next-end -1)
       -1
       (if (and (not (= next-start -1)) (< next-start next-end))
@@ -182,12 +182,12 @@
 
 (defn- extract-section
   "Extracts the outer section from the template."
-  [template]
-  (let [start (find-section-start-tag template 0)]
+  [^String template]
+  (let [^Long start (find-section-start-tag template 0)]
     (if (= start -1)
       nil
       (let [inverted (= (str (.charAt template (+ start 2))) "^")
-            end-tag (find-section-end-tag template (+ start 3) 1)]
+            ^Long end-tag (find-section-end-tag template (+ start 3) 1)]
         (if (= end-tag -1)
           nil
           (let [end (+ (.indexOf template "}}" end-tag) 2)
@@ -204,22 +204,22 @@
 
 (defn- remove-all-tags
   "Removes all tags from the template."
-  [template]
+  [^String template]
   (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
 
 (defn- replace-all-callback
   "Replaces each occurrence of the regex with the return value of the callback."
-  [string regex callback]
+  [^String string ^String regex callback]
   (let [pattern (re-pattern regex)]
     (loop [string (str string)
            start 0]
-      (let [matcher (re-matcher pattern string)]
+      (let [^java.util.regex.Matcher matcher (re-matcher pattern string)]
         (if (and (< start (.length string))
                  (.find matcher start))
-          (let [result (.toMatchResult matcher)
+          (let [^java.util.regex.MatchResult result (.toMatchResult matcher)
                 replacement (callback (re-groups matcher))]
             (recur (.replaceFirst matcher replacement)
-                   (+ (.start result) (.length replacement))))
+                   (+ (.start result) (.length ^String replacement))))
           string)))))
 
 (declare render-template)
@@ -302,8 +302,8 @@
 
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
-  [template data]
-  (loop [s template]
+  [^String template data]
+  (loop [^String s ^String template]
     (let [matcher (re-matcher #"(\{\{[\{&#\^/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
       (if-let [match (re-find matcher)]
         (let [match-start (.start matcher)
@@ -368,9 +368,9 @@
 
 (defn- render-template
   "Renders the template with the data and partials."
-  [template data partials]
-  (let [[template data] (preprocess template data partials)
-        section (extract-section template)]
+  [^String template data partials]
+  (let [[^String template data] (preprocess template data partials)
+        ^String section (extract-section template)]
     (if (nil? section)
       (remove-all-tags (replace-variables template data partials))
       (let [before (.substring template 0 (:start section))

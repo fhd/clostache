@@ -12,4 +12,5 @@
   :test-paths ["src/test/clojure"]
   :resource-paths ["src/test/resources"]
   :profiles {:1.4 {:dependencies [[org.clojure/clojure "1.4.0-beta6"]]}}
-  :aliases {"all" ["with-profile" "dev:dev,1.4"]})
+  :aliases {"all" ["with-profile" "dev:dev,1.4"]}
+  :warn-on-reflection true)
