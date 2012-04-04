@@ -263,13 +263,19 @@ Output:
         Hello, Felix!
 
 Development
-----------------------
+-----------
 
-Make sure you have [Leiningen 2]() installed. Then run tests against supported Clojure versions
-with
+Make sure you have
+[Leiningen 2](https://github.com/technomancy/leiningen/wiki/Upgrading)
+installed.
+
+To run the spec tests, fetch them like this:
 
         git submodule update --init
-        lein2 all test
+
+And run them against all supported Clojure versions:
+
+        lein all test
 
 License
 -------
