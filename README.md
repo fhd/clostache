@@ -9,6 +9,8 @@ since version 1.0. Supporting lambdas since version 1.1.
 Works with Clojure 1.3 since version 1.2. If you want to use Clostache
 in Clojure 1.2 projects, use version 1.1.
 
+[![Build Status](https://secure.travis-ci.org/fhd/clostache.png?branch=master)](http://travis-ci.org/fhd/clostache)
+
 Usage
 -----
 
