@@ -21,7 +21,7 @@
 (defn- load-lambdas [data]
   (update-lambda-in data #(load-string %)))
 
-(defn- flatten-string [s]
+(defn- flatten-string [^String s]
   (.replaceAll (.replaceAll s "\n" "\\\\n") "\r" "\\\\r"))
 
 (defn run-spec-test [spec-test]
