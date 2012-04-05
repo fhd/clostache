@@ -1,4 +1,4 @@
-(defproject de.ubercode.clostache/clostache "1.3.0"
+(defproject de.ubercode.clostache/clostache "1.4.0-SNAPSHOT"
   :min-lein-version "2.0.0"
   :description "{{ mustache }} for Clojure"
   :url "http://github.com/fhd/clostache"
