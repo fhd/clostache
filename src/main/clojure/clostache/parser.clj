@@ -1,6 +1,7 @@
 (ns clostache.parser
   "A parser for mustache templates."
   (:use [clojure.string :only (split)])
+  (:require [clojure.java.io :as io])
   (:import java.util.regex.Matcher))
 
 (defn- ^String map-str
@@ -386,3 +387,10 @@
      (replace-all (render-template template data partials)
                   [["\\\\\\{\\\\\\{" "{{"]
                    ["\\\\\\}\\\\\\}" "}}"]])))
+
+(defn render-resource
+  "Renders a resource located on the classpath"
+  ([^String path data]
+     (render (slurp (io/resource path)) data))
+  ([^String path data partials]
+     (render (slurp (io/resource path)) data partials)))
