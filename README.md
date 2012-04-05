@@ -33,11 +33,17 @@ To install it via [cljr](https://github.com/liebke/cljr), run:
 
         clrj install de.ubercode.clostache/clostache
 
-This is how you can use Clostache from the REPL:
+This is how you use Clostache:
 
-        => (use 'clostache.parser)
-        => (render "Hello, {{name}}!" {:name "Felix"})
-        "Hello, Felix!"
+        (use 'clostache.parser)
+        (render "Hello, {{name}}! {:name "Felix"})"
+
+You can render a resource from the classpath like this:
+
+        (use 'clostache.parser)    
+        (render-resource "templates/hello.mustache" {:name "Michael"})
+
+Each function supports an optional third argument, containing partials (see below).
 
 Examples
 --------
