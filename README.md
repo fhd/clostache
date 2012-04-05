@@ -19,14 +19,14 @@ The easiest way to use Clostache in your project is via
 
 Leiningen:
 
-        [de.ubercode.clostache/clostache "1.2.0"]
+        [de.ubercode.clostache/clostache "1.3.0"]
 
 Maven:
 
         <dependency>
           <groupId>de.ubercode.clostache</groupId>
           <artifactId>clostache</artifactId>
-          <version>1.2.0</version>
+          <version>1.3.0</version>
         </dependency>
 
 To install it via [cljr](https://github.com/liebke/cljr), run:

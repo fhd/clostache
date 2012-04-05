@@ -1,4 +1,4 @@
-1.3.0
+1.3.0 (2012-04-05)
 ==================
 * Move from Maven to Leiningen 2.
 * Eliminated reflection warnings.
