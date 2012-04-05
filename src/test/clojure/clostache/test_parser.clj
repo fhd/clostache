@@ -115,6 +115,5 @@
   (is (= "Hello, Felix" (render "{{#greet}}Felix{{/greet}}"
                                 {:greet #(str "Hello, " %)}))))
 
-
 (deftest test-render-resource-template
   (is (= "Hello, Felix" (render-resource "templates/hello.mustache" {:name "Felix"}))))
