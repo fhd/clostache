@@ -1,6 +1,8 @@
 1.3.0
 ==================
-* [Leiningen 2 preview](https://github.com/technomancy/leiningen/wiki/Upgrading) migration
+* Move from Maven to Leiningen 2.
+* Eliminated reflection warnings.
+* Added `(parser/render-resource)`.
 
 1.2.0 (2012-03-30)
 ==================
