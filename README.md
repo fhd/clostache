@@ -36,7 +36,7 @@ To install it via [cljr](https://github.com/liebke/cljr), run:
 This is how you use Clostache:
 
         (use 'clostache.parser)
-        (render "Hello, {{name}}! {:name "Felix"})"
+        (render "Hello, {{name}}!" {:name "Felix"})
 
 You can render a resource from the classpath like this:
 
