@@ -3,3 +3,7 @@ lein: lein2
 script: lein2 all test
 before_install:
   - git submodule update --init --recursive
+jdk:
+  - openjdk6
+  - openjdk7
+  - oraclejdk7
