@@ -228,10 +228,12 @@
 (defn replace-variables
   "Replaces variables in the template with their values from the data."
   [template data partials]
-  (let [regex #"\{\{(\{|\&|)\s*(.*?)\s*\}{2,3}"]
+  (let [regex #"\{\{(\{|\&|\>|)\s*(.*?)\s*\}{2,3}"]
     (replace-all-callback template regex
                           #(let [var-name (nth % 2)
-                                 var-value ((keyword var-name) data)
+                                 var-k (keyword var-name)
+                                 var-type (second %)
+                                 var-value (var-k data)
                                  var-value (if (fn? var-value)
                                              (render-template
                                               (var-value)
@@ -240,9 +242,9 @@
                                              var-value)
                                  var-value (Matcher/quoteReplacement
                                             (str var-value))]
-                             (if (= (second %) "")
-                               (escape-html var-value)
-                               var-value)))))
+                             (cond (= var-type "") (escape-html var-value)
+                                   (= var-type ">") (render-template (var-k partials) data partials)
+                                   :else var-value)))))
 
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
