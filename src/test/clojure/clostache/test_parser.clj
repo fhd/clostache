@@ -117,3 +117,14 @@
 
 (deftest test-render-resource-template
   (is (= "Hello, Felix" (render-resource "templates/hello.mustache" {:name "Felix"}))))
+
+(deftest test-render-with-partial
+  (is (= "Hi, Felix" (render "Hi, {{>name}}" {:n "Felix"} {:name "{{n}}"}))))
+
+(deftest test-render-partial-recursive
+  (is (= "One Two Three Four Five" (render "One {{>two}}"
+                                            {}
+                                            {:two "Two {{>three}}"
+                                             :three "Three {{>four}}"
+                                             :four "Four {{>five}}"
+                                             :five "Five"}))))
