@@ -19,29 +19,39 @@ The easiest way to use Clostache in your project is via
 
 Leiningen:
 
-        [de.ubercode.clostache/clostache "1.3.0"]
+```clj
+[de.ubercode.clostache/clostache "1.3.0"]
+```
 
 Maven:
 
-        <dependency>
-          <groupId>de.ubercode.clostache</groupId>
-          <artifactId>clostache</artifactId>
-          <version>1.3.0</version>
-        </dependency>
+```xml
+<dependency>
+  <groupId>de.ubercode.clostache</groupId>
+  <artifactId>clostache</artifactId>
+  <version>1.3.0</version>
+</dependency>
+```
 
 To install it via [cljr](https://github.com/liebke/cljr), run:
 
-        clrj install de.ubercode.clostache/clostache
+```
+clrj install de.ubercode.clostache/clostache
+```
 
 This is how you use Clostache:
 
-        (use 'clostache.parser)
-        (render "Hello, {{name}}!" {:name "Felix"})
+```clj
+(use 'clostache.parser)
+(render "Hello, {{name}}!" {:name "Felix"})
+```
 
 You can render a resource from the classpath like this:
 
-        (use 'clostache.parser)    
-        (render-resource "templates/hello.mustache" {:name "Michael"})
+```clj
+(use 'clostache.parser)
+(render-resource "templates/hello.mustache" {:name "Michael"})
+```
 
 Each function supports an optional third argument, containing partials (see below).
 
@@ -55,15 +65,21 @@ will be replaced with the respective data.
 
 Template:
 
-        Hello, {{person}}!
-        
+```mustache
+Hello, {{person}}!
+```
+
 Data:
 
-        {:person "World"}
+```clj
+{:person "World"}
+```
 
 Output:
 
-        Hello, World!
+```
+Hello, World!
+```
 
 ### Escaped output ###
 
@@ -73,19 +89,25 @@ not be escaped.
 
 Template:
 
-        Escaped: {{html}}
-        Unescaped: {{{html}}}
-        Unescaped: {{&html}}
-        
+```mustache
+Escaped: {{html}}
+Unescaped: {{{html}}}
+Unescaped: {{&html}}
+```
+
 Data:
 
-        {:html "<h1>Hello, World!</h1>"}
-        
+```clj
+{:html "<h1>Hello, World!</h1>"}
+```
+
 Output:
 
-        Escaped: &lt;h1&gt;Hello, World!&lt;/h1&gt;
-        Unescaped: <h1>Hello, World!</h1>
-        Unescaped: <h1>Hello, World!</h1>
+```html
+Escaped: &lt;h1&gt;Hello, World!&lt;/h1&gt;
+Unescaped: <h1>Hello, World!</h1>
+Unescaped: <h1>Hello, World!</h1>
+```
 
 ### Sections ###
 
@@ -95,51 +117,69 @@ either the boolean value `true`, a value or a non-empty list.
 
 Template:
 
-        {{#greet}}Hello, World!{{/greet}}
-        
+```mustache
+{{#greet}}Hello, World!{{/greet}}
+```
+
 Data:
 
-        {:greet true}
-        
+```clj
+{:greet true}
+```
+
 Output:
 
-        Hello, World!
+```
+Hello, World!
+```
 
 In case of a list, the section's content is rendered for each element,
 and it can contain tags refering to the elements.
 
 Template:
 
-        <ul>
-        {{#people}}
-            <li>{{name}}</li>
-        {{/people}}
-        </ul>
-        
+```mustache
+<ul>
+{{#people}}
+    <li>{{name}}</li>
+{{/people}}
+</ul>
+```
+
 Data:
 
-        {:people [{:name "Felix"} {:name "Jenny"}]}
-        
+```clj
+{:people [{:name "Felix"} {:name "Jenny"}]}
+```
+
 Output:
 
-        <ul>
-            <li>Felix</li>
-            <li<Jenny</li>
-        </ul>
+```html
+<ul>
+    <li>Felix</li>
+    <li>Jenny</li>
+</ul>
+```
 
 For single values, the section is rendered exactly once.
 
 Template:
 
-        {{#greeting}}{{text}}!{{/greeting}}
+```mustache
+{{#greeting}}{{text}}!{{/greeting}}
+```
 
 Data:
 
-        {:greeting {:text "Hello, World"}}
+```clj
+{:greeting {:text "Hello, World"}}
+```
 
 Output:
 
-        Hello, World!
+```
+Hello, World!
+```
 
 ### Inverted sections ###
 
@@ -149,15 +189,21 @@ either the boolean value `false` or an empty list.
 
 Template:
 
-        {{^ignore}}Hello, World!{{/ignore}}
-        
+```mustache
+{{^ignore}}Hello, World!{{/ignore}}
+```
+
 Data:
 
-        {:ignore false}
-        
+```clj
+{:ignore false}
+```
+
 Output:
 
-        Hello, World!
+```
+Hello, World!
+```
 
 ### Comments ###
 
@@ -165,12 +211,16 @@ Comments are tags that begin with `{{!`. They will not be rendered.
 
 Template:
 
-        <h2>Felix' section<h2>
-        {{! Look ma, I've written a section }}
-        
+```mustache
+<h2>Felix' section<h2>
+{{! Look ma, I've written a section }}
+```
+
 Output:
 
-        <h2>Felix' section</h2>
+```html
+<h2>Felix' section</h2>
+```
 
 ### Dotted names ###
 
@@ -179,15 +229,21 @@ variables or sections.
 
 Template:
 
-        {{greeting.text}}
+```mustache
+{{greeting.text}}
+```
 
 Data:
 
-        {:greeting {:text "Hello, World"}}
+```clj
+{:greeting {:text "Hello, World"}}
+```
 
 Output:
 
-        Hello, World
+```
+Hello, World
+```
 
 ### Implicit iterators ###
 
@@ -196,22 +252,28 @@ elements.
 
 Template:
 
-        <ul>
-        {#names}}
-            <li>{{.}}</li>
-        {{/names}}
-        </ul>
+```mustache
+<ul>
+{#names}}
+    <li>{{.}}</li>
+{{/names}}
+</ul>
+```
 
 Data:
 
-        {:names ["Felix" "Jenny"]}
+```clj
+{:names ["Felix" "Jenny"]}
+```
 
 Output:
 
-        <ul>
-            <li>Felix</li>
-            <li<Jenny</li>
-        </ul>
+```html
+<ul>
+    <li>Felix</li>
+    <li>Jenny</li>
+</ul>
+```
 
 ### Partials ###
 
@@ -219,19 +281,27 @@ Partials allow you to include other templates (e.g. from separate files).
 
 Template:
 
-        Hello{{>names}}!
+```mustache
+Hello{{>names}}!
+```
 
 Data:
 
-        {:people [{:name "Felix"} {:name "Jenny"}]}
+```clj
+{:people [{:name "Felix"} {:name "Jenny"}]}
+```
 
 Partials:
 
-        {:names "{{#people}}, {{name}}{{/people}}"}
+```mustache
+{:names "{{#people}}, {{name}}{{/people}}"}
+```
 
 Output:
 
-        Hello, Felix, Jenny!
+```
+Hello, Felix, Jenny!
+```
 
 ### Set delimiters ###
 
@@ -240,16 +310,22 @@ anything you like.
 
 Template:
 
-        {{=<% %>=}}
-        Hello, <%name%>!
+```mustache
+{{=<% %>=}}
+Hello, <%name%>!
+```
 
 Data:
 
-        {:name "Felix"}
+```clj
+{:name "Felix"}
+```
 
 Output:
 
-        Hello, Felix!
+```
+Hello, Felix!
+```
 
 ### Lambdas ###
 
@@ -257,18 +333,25 @@ You can call also functions from templates.
 
 Template:
 
-        {{hello}}
-        {{#greet}}Felix{{/greet}}
+```mustache
+{{hello}}
+{{#greet}}Felix{{/greet}}
+```
 
 Data:
 
-        {:hello "Hello, World!"}
-        {:greet #(str "Hello, " %)}
+```clj
+{:hello "Hello, World!"}
+{:greet #(str "Hello, " %)}
+```
+
 
 Output:
 
-        Hello, World!
-        Hello, Felix!
+```
+Hello, World!
+Hello, Felix!
+```
 
 Development
 -----------
@@ -279,11 +362,15 @@ installed.
 
 To run the spec tests, fetch them like this:
 
-        git submodule update --init
+```
+git submodule update --init
+```
 
 And run them against all supported Clojure versions:
 
-        lein all test
+```
+lein all test
+```
 
 License
 -------
