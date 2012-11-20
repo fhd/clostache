@@ -1,5 +1,7 @@
-1.4.0
+1.3.1 (2012-11-20)
 ==================
+* Fixed rendering of nested partials.
+* Moved development dependencies to the dev profile.
 
 1.3.0 (2012-04-05)
 ==================
