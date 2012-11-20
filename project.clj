@@ -6,11 +6,9 @@
             :url "http://www.gnu.org/licenses/lgpl-2.1.txt"
             :distribution :repo}
   :dependencies [[org.clojure/clojure "1.3.0"]]
-  :source-paths ["src/main/clojure"]
-  :test-paths ["src/test/clojure"]
   :profiles {:dev {:dependencies [[org.clojure/data.json "0.1.2"]
                                   [jline/jline "0.9.94"]]
-                   :resource-paths ["src/test/resources"]}
+                   :resource-paths ["test-resources"]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}}
   :repositories {"clojure-releases" "http://build.clojure.org/releases"}
   :aliases {"all" ["with-profile" "dev:dev,1.4"]}
