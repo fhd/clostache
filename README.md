@@ -329,7 +329,7 @@ Hello, Felix!
 
 ### Lambdas ###
 
-You can call also functions from templates.
+You can also call functions from templates.
 
 Template:
 
