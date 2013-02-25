@@ -383,6 +383,8 @@
 
 (defn render
   "Renders the template with the data and, if supplied, partials."
+  ([template]
+     (render template {} {}))
   ([template data]
      (render template data {}))
   ([template data partials]
@@ -392,6 +394,8 @@
 
 (defn render-resource
   "Renders a resource located on the classpath"
+  ([^String path]
+     (render (slurp (io/resource path)) {}))
   ([^String path data]
      (render (slurp (io/resource path)) data))
   ([^String path data partials]
