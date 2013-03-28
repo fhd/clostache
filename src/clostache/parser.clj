@@ -355,11 +355,10 @@
       (if section-data
         (if (fn? section-data)
           (section-data (:body section))
-          (let [section-data (if (or (sequential? section-data)
-                                     (map? section-data))
-                               section-data {})
-                section-data (if (sequential? section-data) section-data
-                                 [section-data])
+          (let [section-data (cond (sequential? section-data) section-data
+                                   (map? section-data) [section-data]
+                                   (instance? clojure.lang.Seqable section-data) (seq section-data)
+                                   :else [{}])
                 section-data (if (map? (first section-data))
                                section-data
                                (map (fn [e] {(keyword ".") e})
