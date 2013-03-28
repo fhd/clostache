@@ -132,3 +132,7 @@
 (deftest test-render-with-variable-containing-template
   (is (= "{{hello}},world" (render "{{tmpl}},{{hello}}" {:tmpl "{{hello}}" :hello "world"}))))
 
+(deftest test-render-sorted-set
+  (let [sort-by-x (fn [x y] (compare (:x x) (:x y)))
+        l (sorted-set-by sort-by-x {:x 1} {:x 5} {:x 3})]
+    (is (= "135" (render "{{#l}}{{x}}{{/l}}" {:l l})))))
