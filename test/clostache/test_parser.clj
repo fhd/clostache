@@ -128,3 +128,7 @@
                                              :three "Three {{>four}}"
                                              :four "Four {{>five}}"
                                              :five "Five"}))))
+
+(deftest test-render-with-variable-containing-template
+  (is (= "{{hello}},world" (render "{{tmpl}},{{hello}}" {:tmpl "{{hello}}" :hello "world"}))))
+
