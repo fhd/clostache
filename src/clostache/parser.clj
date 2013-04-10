@@ -1,6 +1,7 @@
 (ns clostache.parser
   "A parser for mustache templates."
-  (:use [clojure.string :only (split)])
+  (:use [clojure.string :only (split)]
+        [clojure.core.incubator :only (seqable?)])
   (:require [clojure.java.io :as io])
   (:import java.util.regex.Matcher))
 
@@ -349,7 +350,7 @@
   [section data partials]
   (let [section-data ((keyword (:name section)) data)]
     (if (:inverted section)
-      (if (or (and (sequential? section-data) (empty? section-data))
+      (if (or (and (seqable? section-data) (empty? section-data))
               (not section-data))
         (:body section))
       (if section-data
@@ -357,7 +358,7 @@
           (section-data (:body section))
           (let [section-data (cond (sequential? section-data) section-data
                                    (map? section-data) [section-data]
-                                   (instance? clojure.lang.Seqable section-data) (seq section-data)
+                                   (seqable? section-data) (seq section-data)
                                    :else [{}])
                 section-data (if (map? (first section-data))
                                section-data
