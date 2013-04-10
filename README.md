@@ -401,3 +401,4 @@ Contributors
 * [Michael Klishin](https://github.com/michaelklishin)
 * [Stan Rozenraukh](https://github.com/stanistan)
 * [Tero Parviainen](https://github.com/teropa)
+* [Masashi Iizuka](https://github.com/liquidz)
