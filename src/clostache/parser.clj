@@ -1,7 +1,8 @@
 (ns clostache.parser
   "A parser for mustache templates."
   (:use [clojure.string :only (split)])
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clojure.string  :as str])
   (:import java.util.regex.Matcher))
 
 (defn- ^String map-str
@@ -203,25 +204,10 @@
                                                 (.indexOf section "}}")))]
             (Section. section-name body start end inverted)))))))
 
-(defn- remove-all-tags
-  "Removes all tags from the template."
-  [^String template]
-  (replace-all template [["\\{\\{\\S*\\}\\}" ""]]))
-
 (defn- replace-all-callback
   "Replaces each occurrence of the regex with the return value of the callback."
-  [^String string ^String regex callback]
-  (let [pattern (re-pattern regex)]
-    (loop [string (str string)
-           start 0]
-      (let [^java.util.regex.Matcher matcher (re-matcher pattern string)]
-        (if (and (< start (.length string))
-                 (.find matcher start))
-          (let [^java.util.regex.MatchResult result (.toMatchResult matcher)
-                replacement (callback (re-groups matcher))]
-            (recur (.replaceFirst matcher replacement)
-                   (+ (.start result) (.length ^String replacement))))
-          string)))))
+  [^String string regex callback]
+  (str/replace string regex #(callback %)))
 
 (declare render-template)
 
@@ -375,7 +361,7 @@
   (let [[^String template data] (preprocess template data partials)
         ^String section (extract-section template)]
     (if (nil? section)
-      (remove-all-tags (replace-variables template data partials))
+      (replace-variables template data partials)
       (let [before (.substring template 0 (:start section))
             after (.substring template (:end section))]
         (recur (str before (render-section section data partials) after) data
