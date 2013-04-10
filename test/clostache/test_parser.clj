@@ -135,4 +135,6 @@
 (deftest test-render-sorted-set
   (let [sort-by-x (fn [x y] (compare (:x x) (:x y)))
         l (sorted-set-by sort-by-x {:x 1} {:x 5} {:x 3})]
-    (is (= "135" (render "{{#l}}{{x}}{{/l}}" {:l l})))))
+    (is (= "135" (render "{{#l}}{{x}}{{/l}}" {:l l})))
+    (is (= "" (render "{{^l}}X{{/l}}" {:l l}))))
+  (is (= "X" (render "{{^l}}X{{/l}}" {:l (sorted-set)}))))
