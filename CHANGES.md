@@ -1,6 +1,7 @@
 1.4.0
 ==================
 * Support variables containing templates.
+* Support all seqable data structures.
 
 1.3.1 (2012-11-20)
 ==================
