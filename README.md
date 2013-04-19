@@ -402,3 +402,4 @@ Contributors
 * [Stan Rozenraukh](https://github.com/stanistan)
 * [Tero Parviainen](https://github.com/teropa)
 * [Masashi Iizuka](https://github.com/liquidz)
+* [Julian Birch](https://github.com/JulianBirch)
