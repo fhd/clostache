@@ -403,3 +403,4 @@ Contributors
 * [Tero Parviainen](https://github.com/teropa)
 * [Masashi Iizuka](https://github.com/liquidz)
 * [Julian Birch](https://github.com/JulianBirch)
+* [Ryan Cole](https://github.com/ryancole)
