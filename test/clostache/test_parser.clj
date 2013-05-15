@@ -113,7 +113,11 @@
 
 (deftest test-render-lambda-with-params
   (is (= "Hello, Felix" (render "{{#greet}}Felix{{/greet}}"
-                                {:greet #(str "Hello, " %)}))))
+                                {:greet (fn [text] (str "Hello, " text))})))
+  (is (= "Hi TOM Hi BOB "
+         (render "{{#people}}Hi {{#upper}}{{name}}{{/upper}} {{/people}}"
+                 {:people [{:name "Tom"}, {:name "Bob"}] 
+                  :upper (fn [text] (fn [render-fn] (clojure.string/upper-case (render-fn text))))}))))
 
 (deftest test-render-resource-template
   (is (= "Hello, Felix" (render-resource "templates/hello.mustache" {:name "Felix"}))))
