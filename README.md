@@ -254,7 +254,7 @@ Template:
 
 ```mustache
 <ul>
-{#names}}
+{{#names}}
     <li>{{.}}</li>
 {{/names}}
 </ul>
