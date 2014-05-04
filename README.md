@@ -351,6 +351,28 @@ Output:
 ```
 Hello, World!
 Hello, Felix!
+```  
+
+Functions can also render the text given to them if they need to do something more complicated.  
+
+Template:
+
+```mustache
+"{{#people}}Hi {{#upper}}{{name}}{{/upper}}{{/people}}"
+```
+
+Data:
+```clj
+{:people [{:name "Felix"}] 
+ :upper (fn [text] 
+          (fn [render-fn] 
+            (clojure.string/upper-case (render-fn text))))}
+```
+
+Output:  
+
+```
+Hello FELIX
 ```
 
 Development

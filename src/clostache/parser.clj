@@ -341,7 +341,10 @@
         (:body section))
       (if section-data
         (if (fn? section-data)
-          (section-data (:body section))
+          (let [result (section-data (:body section))]
+            (if (fn? result) 
+              (result #(render-template % data partials))
+              result))
           (let [section-data (cond (sequential? section-data) section-data
                                    (map? section-data) [section-data]
                                    (seqable? section-data) (seq section-data)
