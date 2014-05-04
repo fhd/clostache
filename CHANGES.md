@@ -3,6 +3,7 @@
 * Support variables containing templates.
 * Support all seqable data structures.
 * Make the data parameter optional.
+* Allow lambda sections to render text.
 
 1.3.1 (2012-11-20)
 ==================
