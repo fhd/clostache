@@ -426,3 +426,4 @@ Contributors
 * [Masashi Iizuka](https://github.com/liquidz)
 * [Julian Birch](https://github.com/JulianBirch)
 * [Ryan Cole](https://github.com/ryancole)
+* [Simon Lawrence](https://github.com/simonl2002)
