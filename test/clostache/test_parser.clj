@@ -113,7 +113,7 @@
 
 (deftest test-render-lambda-with-params
   (is (= "Hello, Felix" (render "{{#greet}}Felix{{/greet}}"
-                                {:greet (fn [text] (str "Hello, " text))})))
+                                {:greet #(str "Hello, " %)})))
   (is (= "Hi TOM Hi BOB "
          (render "{{#people}}Hi {{#upper}}{{name}}{{/upper}} {{/people}}"
                  {:people [{:name "Tom"}, {:name "Bob"}] 
