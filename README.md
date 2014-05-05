@@ -20,7 +20,7 @@ The easiest way to use Clostache in your project is via
 Leiningen:
 
 ```clj
-[de.ubercode.clostache/clostache "1.3.1"]
+[de.ubercode.clostache/clostache "1.4.0"]
 ```
 
 Maven:
@@ -29,7 +29,7 @@ Maven:
 <dependency>
   <groupId>de.ubercode.clostache</groupId>
   <artifactId>clostache</artifactId>
-  <version>1.3.1</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 
