@@ -1,5 +1,6 @@
 1.5.0
 =====
+* Handle path whitespace consistently.
 
 1.4.0 (2014-05-05)
 ==================
