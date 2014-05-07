@@ -427,3 +427,4 @@ Contributors
 * [Julian Birch](https://github.com/JulianBirch)
 * [Ryan Cole](https://github.com/ryancole)
 * [Simon Lawrence](https://github.com/simonl2002)
+* [Darrell Hamilton](https://github.com/zeroem)
