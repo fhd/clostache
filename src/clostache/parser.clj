@@ -246,16 +246,7 @@
 (defn- path-data
   "Extract the data for the supplied path."
   [elements data]
-  (loop [i 0
-         d data]
-    (let [element (nth elements i)
-          value ((keyword element) d)]
-      (if (nil? value)
-        nil
-        (let [next-i (inc i)]
-          (if (= next-i (count elements))
-            value
-            (recur next-i value)))))))
+  (get-in data (map keyword elements)))
 
 (defn- convert-path
   "Convert a tag with a dotted name to nested sections, using the
