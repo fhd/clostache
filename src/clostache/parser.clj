@@ -298,7 +298,7 @@
       (if-let [match (re-find matcher)]
         (let [match-start (.start matcher)
               match-end (.end matcher)
-              converted (convert-path (nth match 2) (nth match 1)
+              converted (convert-path (str/trim (nth match 2)) (nth match 1)
                                       (nth match 3) data)]
           (recur (str (.substring s 0 match-start) converted
                       (.substring s match-end))))
