@@ -1,6 +1,7 @@
 (ns clostache.test-parser
   (:use clojure.test
-        clostache.parser))
+        clostache.parser
+        strictly.map))
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
@@ -106,6 +107,10 @@
 (deftest test-render-tag-with-dotted-name-like-section
   (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
                                 {:felix {:name "Felix"}}))))
+
+(deftest test-doesnt-retrieve-irrelevant-keys
+  (is (= "FelixFelix" (render "{{felix.name.first}}{{felix.name.first}}"
+                              (strict {:felix {:name {:first "Felix"}}})))))
 
 (deftest test-render-lambda
   (is (= "Hello, Felix" (render "Hello, {{name}}"

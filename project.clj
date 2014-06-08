@@ -8,7 +8,8 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/core.incubator "0.1.2"]]
   :profiles {:dev {:dependencies [[org.clojure/data.json "0.1.2"]
-                                  [jline/jline "0.9.94"]]
+                                  [jline/jline "0.9.94"]
+                                  [strictly "0.1.0-SNAPSHOT"]]
                    :resource-paths ["test-resources"]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}}
   :repositories {"clojure-releases" "http://build.clojure.org/releases"}
