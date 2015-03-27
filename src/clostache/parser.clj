@@ -284,16 +284,39 @@
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
   [^String template data]
-  (loop [^String s ^String template]
-    (let [matcher (re-matcher #"(\{\{[\{&#\^/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
-      (if-let [match (re-find matcher)]
-        (let [match-start (.start matcher)
-              match-end (.end matcher)
-              converted (convert-path (str/trim (nth match 2)) (nth match 1)
-                                      (nth match 3) data)]
-          (recur (str (.substring s 0 match-start) converted
-                      (.substring s match-end))))
-        s))))
+  (let [dot-regex #"(\{\{[\{&#\^/]?)([^\}]+\.[^\}]+)(\}{2,3})"
+        section-start-matcher (re-matcher #"\{\{#(\w*)\}\}" template)
+        section-end-matcher (re-matcher #"\{\{\/(\w*)\}\}" template)
+        template-matcher (re-matcher dot-regex template)
+        sections (loop [section-start-tag (second (re-find section-start-matcher))
+                        section-end-tag (second (re-find section-end-matcher))
+                        result []]
+                   (if-not (and section-start-tag
+                                section-end-tag)
+                     result
+                     (let [start (.start section-start-matcher)
+                           end (.end section-end-matcher)]
+                       (recur (second (re-find section-start-matcher))
+                              (second (re-find section-end-matcher))
+                              (conj result {:start start :end end :section section-start-tag})))))]
+    (loop [^String s ^String template]
+      (let [matcher (re-matcher dot-regex s)]
+        (if-let [match (re-find matcher)]
+          (if-let [template-match (re-find template-matcher)]
+            (let [match-start (.start matcher)
+                  match-end (.end matcher)
+                  template-match-start (.start template-matcher)
+                  template-match-end (.end template-matcher)
+                  in-sections (sort-by :start (filter #(and (< (:start %) template-match-start)
+                                                            (> (:end %) template-match-end)) sections))
+                  data (if in-sections
+                         (get-in data (map #(keyword (:section %)) in-sections))
+                         data)
+                  converted (convert-path (str/trim (nth match 2)) (nth match 1)
+                                          (nth match 3) data)]
+              (recur (str (.substring s 0 match-start) converted
+                          (.substring s match-end)))))
+          s)))))
 
 (defn- join-standalone-tags
   "Remove newlines after standalone (i.e. on their own line) section/partials
