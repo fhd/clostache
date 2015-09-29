@@ -36,7 +36,7 @@ Maven:
 To install it via [cljr](https://github.com/liebke/cljr), run:
 
 ```
-clrj install de.ubercode.clostache/clostache
+cljr install de.ubercode.clostache/clostache
 ```
 
 This is how you use Clostache:
