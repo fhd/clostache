@@ -50,6 +50,13 @@
    to HTML. When `:url`, rendering URL-encodes appropriate characters."
   :html)
 
+(defmacro with-url-escaping
+  "Within the dynamic lifetime of this form, render templates with URL
+   escaping."
+  [& body]
+  `(binding [*escape-strategy* :url]
+     ~@body))
+
 (defn- escape-content
   "Replaces sensitive characters with their respective escaped
    versions, using an escaping scheme determined by the value of
