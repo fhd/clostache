@@ -37,6 +37,29 @@
                        ["<" "&lt;"]
                        [">" "&gt;"]]))
 
+(defn- escape-url
+  "Replaces syntactically-significant URL characters with encoded
+   counterparts."
+  [string]
+  (java.net.URLEncoder/encode string))
+
+(def ^:private escape-strategies
+  {:html escape-html
+   :url escape-url})
+
+(def ^:dynamic *escape-strategy*
+  "When `:html` (the default), rendering escapes characters sensitive
+   to HTML. When `:url`, rendering URL-encodes appropriate characters."
+  :html)
+
+(defn- escape-content
+  "Replaces sensitive characters with their respective escaped
+   versions, using an escaping scheme determined by the value of
+   `*escape-strategy*`."
+  [string]
+  ((*escape-strategy* escape-strategies) string))
+
+
 (defn- indent-partial
   "Indent all lines of the partial by indent."
   [partial indent]
@@ -229,7 +252,7 @@
                                              var-value)
                                  var-value (Matcher/quoteReplacement
                                             (str var-value))]
-                             (cond (= var-type "") (escape-html var-value)
+                             (cond (= var-type "") (escape-content var-value)
                                    (= var-type ">") (render-template (var-k partials) data partials)
                                    :else var-value)))))
 
