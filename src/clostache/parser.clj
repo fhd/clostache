@@ -238,7 +238,7 @@
 (defn replace-variables
   "Replaces variables in the template with their values from the data."
   [template data partials]
-  (let [regex #"\{\{(\{|\&|\>|)\s*(.*?)\s*\}{2,3}"]
+  (let [regex #"\{\{([{&>%;]{0,1})\s*(.*?)\s*\}{2,3}"]
     (replace-all-callback template regex
                           #(let [var-name (nth % 2)
                                  var-k (keyword var-name)
@@ -253,6 +253,8 @@
                                  var-value (Matcher/quoteReplacement
                                             (str var-value))]
                              (cond (= var-type "") (escape-content var-value)
+                                   (= var-type "%") (escape-url var-value)
+                                   (= var-type ";") (escape-html var-value)
                                    (= var-type ">") (render-template (var-k partials) data partials)
                                    :else var-value)))))
 
