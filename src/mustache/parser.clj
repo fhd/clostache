@@ -1,9 +1,7 @@
-(ns clostache.parser
+(ns mustache.parser
   "A parser for mustache templates."
-  (:use [clojure.string :only (split)]
-        [clojure.core.incubator :only (seqable?)])
   (:require [clojure.java.io :as io]
-            [clojure.string  :as str])
+            [clojure.string :as str :refer [split]])
   (:import java.util.regex.Matcher))
 
 (defn- ^String map-str
@@ -36,6 +34,36 @@
                        ["\"" "&quot;"]
                        ["<" "&lt;"]
                        [">" "&gt;"]]))
+
+(defn- escape-url
+  "Replaces syntactically-significant URL characters with encoded
+   counterparts."
+  [string]
+  (java.net.URLEncoder/encode string))
+
+(def ^:private escape-strategies
+  {:html escape-html
+   :url escape-url})
+
+(def ^:dynamic *escape-strategy*
+  "When `:html` (the default), rendering escapes characters sensitive
+   to HTML. When `:url`, rendering URL-encodes appropriate characters."
+  :html)
+
+(defmacro with-url-escaping
+  "Within the dynamic lifetime of this form, render templates with URL
+   escaping."
+  [& body]
+  `(binding [*escape-strategy* :url]
+     ~@body))
+
+(defn- escape-content
+  "Replaces sensitive characters with their respective escaped
+   versions, using an escaping scheme determined by the value of
+   `*escape-strategy*`."
+  [string]
+  ((*escape-strategy* escape-strategies) string))
+
 
 (defn- indent-partial
   "Indent all lines of the partial by indent."
@@ -215,7 +243,7 @@
 (defn replace-variables
   "Replaces variables in the template with their values from the data."
   [template data partials]
-  (let [regex #"\{\{(\{|\&|\>|)\s*(.*?)\s*\}{2,3}"]
+  (let [regex #"\{\{([{&>%;]{0,1})\s*(.*?)\s*\}{2,3}"]
     (replace-all-callback template regex
                           #(let [var-name (nth % 2)
                                  var-k (keyword var-name)
@@ -229,9 +257,12 @@
                                              var-value)
                                  var-value (Matcher/quoteReplacement
                                             (str var-value))]
-                             (cond (= var-type "") (escape-html var-value)
-                                   (= var-type ">") (render-template (var-k partials) data partials)
-                                   :else var-value)))))
+                             (case var-type
+                               "" (escape-content var-value)
+                               "%" (escape-url var-value)
+                               ";" (escape-html var-value)
+                               ">" (render-template (var-k partials) data partials)
+                               var-value)))))
 
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
@@ -323,11 +354,13 @@
         template (convert-paths template data)]
     [template data]))
 
+(defn- iterable? [x] (instance? Iterable x))
+
 (defn- render-section
   [section data partials]
   (let [section-data ((keyword (:name section)) data)]
     (if (:inverted section)
-      (if (or (and (seqable? section-data) (empty? section-data))
+      (if (or (and (iterable? section-data) (empty? section-data))
               (not section-data))
         (:body section))
       (if section-data
@@ -338,7 +371,7 @@
               result))
           (let [section-data (cond (sequential? section-data) section-data
                                    (map? section-data) [section-data]
-                                   (seqable? section-data) (seq section-data)
+                                   (iterable? section-data) (seq section-data)
                                    :else [{}])
                 section-data (if (map? (first section-data))
                                section-data
