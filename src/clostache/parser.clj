@@ -252,11 +252,12 @@
                                              var-value)
                                  var-value (Matcher/quoteReplacement
                                             (str var-value))]
-                             (cond (= var-type "") (escape-content var-value)
-                                   (= var-type "%") (escape-url var-value)
-                                   (= var-type ";") (escape-html var-value)
-                                   (= var-type ">") (render-template (var-k partials) data partials)
-                                   :else var-value)))))
+                             (case var-type
+                               "" (escape-content var-value)
+                               "%" (escape-url var-value)
+                               ";" (escape-html var-value)
+                               ">" (render-template (var-k partials) data partials)
+                               var-value)))))
 
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
