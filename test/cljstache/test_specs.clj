@@ -1,6 +1,6 @@
 (ns cljstache.test-specs
   (:use clojure.test
-        cljstache.parser)
+        cljstache.core)
   (:require [clojure.data.json :as json]))
 
 (defn- load-spec-tests [spec]

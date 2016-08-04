@@ -1,6 +1,6 @@
 (ns cljstache.test-parser
   (:use clojure.test
-        cljstache.parser))
+        cljstache.core))
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))

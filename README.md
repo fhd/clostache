@@ -1,7 +1,6 @@
 Cljstache
 =========
-
-[{{ mustache }}](http://mustache.github.com) for Clojure.
+Logic-less {{ [mustache](http://mustache.github.com) }} templates for Clojure[Script].
 
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
 , including lambdas.
@@ -26,14 +25,14 @@ Add to project.clj
 This is how you use Cljstache:
 
 ```clj
-(use 'cljstache.parser)
+(use 'cljstache.core)
 (render "Hello, {{name}}!" {:name "Felix"})
 ```
 
 You can render a resource from the classpath like this:
 
 ```clj
-(use 'cljstache.parser)
+(use 'cljstache.core)
 (render-resource "templates/hello.mustache" {:name "Michael"})
 ```
 
@@ -377,6 +376,11 @@ And run them against all supported Clojure versions:
 ```
 lein all test
 ```
+
+Requiremnts
+-----------
+
+Requires clojure or clojurescript >= v1.7.0
 
 License
 -------

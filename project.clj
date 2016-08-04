@@ -10,10 +10,8 @@
                                   [org.clojure/data.json "0.1.2"]
                                   [jline/jline "0.9.94"]]
                    :resource-paths ["test-resources"]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.0"]]}
-             :1.6 {:dependencies [[org.clojure/clojure "1.5.0"]]}
-             :1.7 {:dependencies [[org.clojure/clojure "1.5.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha10"]]}}
-  :aliases {"all" ["with-profile" "dev:dev,1.5:dev,1.6:dev,1.7:dev,1.8:dev,1.9"]}
+  :aliases {"all" ["with-profile" "dev:dev,1.7:dev,1.8:dev,1.9"]}
   :global-vars {*warn-on-reflection* true})

@@ -1,4 +1,4 @@
-(ns cljstache.parser
+(ns cljstache.core
   "A parser for mustache templates."
   (:use [clojure.string :only (split)])
   (:require [clojure.java.io :as io]
