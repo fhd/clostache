@@ -7,7 +7,7 @@ Compliant with the [Mustache spec](http://github.com/mustache/spec)
 
 Forked from [clostache](https://github.com/fhd/clostache) and updated to be compatible with ClojureScript.
 
-[![Build Status](https://secure.travis-ci.org/fotoetienne/cljstache.png?branch=master)](http://travis-ci.org/fotoetienne/cljstache)
+[![Build Status](https://travis-ci.org/fotoetienne/cljstache.svg?branch=master)](https://travis-ci.org/fotoetienne/cljstache)
 
 Usage
 -----
