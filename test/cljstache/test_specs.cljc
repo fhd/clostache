@@ -1,7 +1,9 @@
 (ns cljstache.test-specs
-  (:use clojure.test
-        cljstache.core)
-  (:require [clojure.data.json :as json]))
+  (:require
+   #?(:clj  [clojure.test :refer :all]
+      :cljs [cljs.test :refer-macros [deftest testing is]])
+   [cljstache.core :refer [render]]
+   #?(:clj [clojure.data.json :as json])))
 
 (defn- load-spec-tests [spec]
   (let [path (-> (Thread/currentThread)

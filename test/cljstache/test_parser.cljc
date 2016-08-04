@@ -1,6 +1,8 @@
 (ns cljstache.test-parser
-  (:use clojure.test
-        cljstache.core))
+  (:require
+   #?(:clj  [clojure.test :refer :all]
+      :cljs [cljs.test :refer-macros [deftest testing is]])
+   [cljstache.core :refer [render] :as cs]))
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
@@ -119,8 +121,9 @@
                  {:people [{:name "Tom"}, {:name "Bob"}]
                   :upper (fn [text] (fn [render-fn] (clojure.string/upper-case (render-fn text))))}))))
 
-(deftest test-render-resource-template
-  (is (= "Hello, Felix" (render-resource "templates/hello.mustache" {:name "Felix"}))))
+#?(:clj
+   (deftest test-render-resource-template
+     (is (= "Hello, Felix" (cs/render-resource "templates/hello.mustache" {:name "Felix"})))))
 
 (deftest test-render-with-partial
   (is (= "Hi, Felix" (render "Hi, {{>name}}" {:n "Felix"} {:name "{{n}}"}))))

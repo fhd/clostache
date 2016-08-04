@@ -1,6 +1,6 @@
 language: clojure
 
-script: lein all test
+script: lein test-clj
 
 before_install:
   - git submodule update --init --recursive

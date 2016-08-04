@@ -1,9 +1,14 @@
 (ns cljstache.core
   "A parser for mustache templates."
   (:require #?(:clj [clojure.java.io :as io])
-            [clojure.string  :as str :refer [split]])
-  #?(:clj (:import java.util.regex.Matcher)))
+            [clojure.string :as str :refer [split]]))
 
+;; cljs support
+(def re-quote-replacement
+  #?(:clj str/re-quote-replacement
+     :cljs (fn [s] s)))
+
+;; clj < 1.9 support
 #?(:clj
    (def seqable?
      "Returns true if (seq x) will succeed, false otherwise.
@@ -39,7 +44,7 @@
             (.replaceAll (str string) from
                          (if dont-quote
                            to
-                           (Matcher/quoteReplacement to))))
+                           (re-quote-replacement to))))
           string replacements))
 
 (defn- escape-html
@@ -384,11 +389,12 @@
                   [["\\\\\\{\\\\\\{" "{{"]
                    ["\\\\\\}\\\\\\}" "}}"]])))
 
-(defn render-resource
-  "Renders a resource located on the classpath"
-  ([^String path]
-     (render (slurp (io/resource path)) {}))
-  ([^String path data]
-     (render (slurp (io/resource path)) data))
-  ([^String path data partials]
-     (render (slurp (io/resource path)) data partials)))
+#?(:clj
+   (defn render-resource
+     "Renders a resource located on the classpath"
+     ([^String path]
+      (render (slurp (io/resource path)) {}))
+     ([^String path data]
+      (render (slurp (io/resource path)) data))
+     ([^String path data partials]
+      (render (slurp (io/resource path)) data partials))))
