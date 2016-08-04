@@ -1,21 +1,23 @@
 (ns cljstache.core
   "A parser for mustache templates."
-  (:use [clojure.string :only (split)])
-  (:require [clojure.java.io :as io]
-            [clojure.string  :as str])
-  (:import java.util.regex.Matcher))
+  (:require #?(:clj [clojure.java.io :as io])
+            [clojure.string  :as str :refer [split]])
+  #?(:clj (:import java.util.regex.Matcher)))
 
-(defn seqable?
-  "Returns true if (seq x) will succeed, false otherwise.
-  Included in clojure core from v1.9"
-  [x]
-  (or (seq? x)
-      (instance? clojure.lang.Seqable x)
-      (nil? x)
-      (instance? Iterable x)
-      (-> x .getClass .isArray)
-      (string? x)
-      (instance? java.util.Map x)))
+#?(:clj
+   (def seqable?
+     "Returns true if (seq x) will succeed, false otherwise.
+      Included in clojure core from v1.9"
+     (when (-> "seqable?" symbol resolve)
+       seqable?
+       (fn [x]
+         (or (seq? x)
+             (instance? clojure.lang.Seqable x)
+             (nil? x)
+             (instance? Iterable x)
+             (-> x .getClass .isArray)
+             (string? x)
+             (instance? java.util.Map x))))))
 
 (defn- ^String map-str
   "Apply f to each element of coll, concatenate all results into a

@@ -5,7 +5,7 @@ Logic-less {{ [mustache](http://mustache.github.com) }} templates for Clojure[Sc
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
 , including lambdas.
 
-Forked from [cljstache](https://github.com/fhd/cljstache) and updated to be compatible with ClojureScript.
+Forked from [clostache](https://github.com/fhd/clostache) and updated to be compatible with ClojureScript.
 
 [![Build Status](https://secure.travis-ci.org/fotoetienne/cljstache.png?branch=master)](http://travis-ci.org/fotoetienne/cljstache)
 
@@ -377,8 +377,8 @@ And run them against all supported Clojure versions:
 lein all test
 ```
 
-Requiremnts
------------
+Requirements
+------------
 
 As steadyhash uses Clojure's reader conditionals, steadyhash is dependent on both Clojure 1.7 and Leiningen 2.5.2 or later.
 
