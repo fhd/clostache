@@ -380,7 +380,7 @@ lein all test
 Requiremnts
 -----------
 
-Requires clojure or clojurescript >= v1.7.0
+As steadyhash uses Clojure's reader conditionals, steadyhash is dependent on both Clojure 1.7 and Leiningen 2.5.2 or later.
 
 License
 -------
