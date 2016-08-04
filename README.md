@@ -1,55 +1,39 @@
-Clostache
+Cljstache
 =========
 
 [{{ mustache }}](http://mustache.github.com) for Clojure.
 
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
-since version 1.0. Supporting lambdas since version 1.1.
+, including lambdas.
 
-Works with Clojure 1.3 since version 1.2. If you want to use Clostache
-in Clojure 1.2 projects, use version 1.1.
+Forked from [cljstache](https://github.com/fhd/cljstache) and updated to be compatible with ClojureScript.
 
-[![Build Status](https://secure.travis-ci.org/fhd/clostache.png?branch=master)](http://travis-ci.org/fhd/clostache)
+[![Build Status](https://secure.travis-ci.org/fotoetienne/cljstache.png?branch=master)](http://travis-ci.org/fotoetienne/cljstache)
 
 Usage
 -----
 
-The easiest way to use Clostache in your project is via
-[Clojars](http://clojars.org/de.ubercode.clostache/clostache).
+The easiest way to use Cljstache in your project is via
+[Clojars](http://clojars.org/fotoetienne/cljstache).
 
-Leiningen:
+Add to project.clj
+
+# TODO: clojars badge
+```clj
+[cljstache "1.6.0-SNAPSHOT"]
+```
+
+This is how you use Cljstache:
 
 ```clj
-[de.ubercode.clostache/clostache "1.4.0"]
-```
-
-Maven:
-
-```xml
-<dependency>
-  <groupId>de.ubercode.clostache</groupId>
-  <artifactId>clostache</artifactId>
-  <version>1.4.0</version>
-</dependency>
-```
-
-To install it via [cljr](https://github.com/liebke/cljr), run:
-
-```
-clrj install de.ubercode.clostache/clostache
-```
-
-This is how you use Clostache:
-
-```clj
-(use 'clostache.parser)
+(use 'cljstache.parser)
 (render "Hello, {{name}}!" {:name "Felix"})
 ```
 
 You can render a resource from the classpath like this:
 
 ```clj
-(use 'clostache.parser)
+(use 'cljstache.parser)
 (render-resource "templates/hello.mustache" {:name "Michael"})
 ```
 
@@ -351,9 +335,9 @@ Output:
 ```
 Hello, World!
 Hello, Felix!
-```  
+```
 
-Functions can also render the text given to them if they need to do something more complicated.  
+Functions can also render the text given to them if they need to do something more complicated.
 
 Template:
 
@@ -363,13 +347,13 @@ Template:
 
 Data:
 ```clj
-{:people [{:name "Felix"}] 
- :upper (fn [text] 
-          (fn [render-fn] 
+{:people [{:name "Felix"}]
+ :upper (fn [text]
+          (fn [render-fn]
             (clojure.string/upper-case (render-fn text))))}
 ```
 
-Output:  
+Output:
 
 ```
 Hello FELIX
@@ -417,6 +401,7 @@ Floor, Boston, MA 02110-1301 USA
 Contributors
 ------------
 
+* [Felix H. Dahlke](https://github.com/fhd) (Original Author)
 * [Rory Geoghegan](https://github.com/rgeoghegan)
 * [Santtu Lintervo](https://github.com/santervo)
 * [Pierre-Alexandre St-Jean](https://github.com/pastjean)

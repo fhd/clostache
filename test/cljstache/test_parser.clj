@@ -1,6 +1,6 @@
-(ns clostache.test-parser
+(ns cljstache.test-parser
   (:use clojure.test
-        clostache.parser))
+        cljstache.parser))
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
@@ -116,7 +116,7 @@
                                 {:greet #(str "Hello, " %)})))
   (is (= "Hi TOM Hi BOB "
          (render "{{#people}}Hi {{#upper}}{{name}}{{/upper}} {{/people}}"
-                 {:people [{:name "Tom"}, {:name "Bob"}] 
+                 {:people [{:name "Tom"}, {:name "Bob"}]
                   :upper (fn [text] (fn [render-fn] (clojure.string/upper-case (render-fn text))))}))))
 
 (deftest test-render-resource-template

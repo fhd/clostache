@@ -1,16 +1,19 @@
-(defproject de.ubercode.clostache/clostache "1.5.0-SNAPSHOT"
+(defproject cljstache "1.6.0-SNAPSHOT"
   :min-lein-version "2.0.0"
-  :description "{{ mustache }} for Clojure"
+  :description "{{ mustache }} for Clojure[Script]"
   :url "http://github.com/fhd/clostache"
   :license {:name "GNU Lesser General Public License 2.1"
             :url "http://www.gnu.org/licenses/lgpl-2.1.txt"
             :distribution :repo}
-  :dependencies [[org.clojure/clojure "1.3.0"]
-                 [org.clojure/core.incubator "0.1.2"]]
-  :profiles {:dev {:dependencies [[org.clojure/data.json "0.1.2"]
+  :dependencies []
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
+                                  [org.clojure/data.json "0.1.2"]
                                   [jline/jline "0.9.94"]]
                    :resource-paths ["test-resources"]}
-             :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}}
-  :repositories {"clojure-releases" "http://build.clojure.org/releases"}
-  :aliases {"all" ["with-profile" "dev:dev,1.4"]}
-  :warn-on-reflection true)
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.0"]]}
+             :1.6 {:dependencies [[org.clojure/clojure "1.5.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.5.0"]]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha10"]]}}
+  :aliases {"all" ["with-profile" "dev:dev,1.5:dev,1.6:dev,1.7:dev,1.8:dev,1.9"]}
+  :global-vars {*warn-on-reflection* true})
