@@ -10,7 +10,7 @@
 
 ;; clj < 1.9 support
 #?(:clj
-   (def seqable?
+   (def ^Boolean seqable?
      "Returns true if (seq x) will succeed, false otherwise.
       Included in clojure core from v1.9"
      (when (-> "seqable?" symbol resolve)
@@ -30,8 +30,41 @@
   [f coll]
   (apply str (map f coll)))
 
+; To match clj regex api
+#?(:cljs
+   (defn re-matcher [pattern s]
+     [(re-pattern pattern) s]))
+
+#?(:cljs
+   (defn re-find
+     ([re s] (cljs.core/re-find re s))
+     ([[re s]] (re-find re s))))
+
+#?(:cljs
+   (defn re-groups
+     ([[re s]] (.exec re s))))
+
+(defn matcher-find
+  ([^java.util.regex.Matcher m] (matcher-find m 0))
+  #?(:clj
+     ([^java.util.regex.Matcher m offset]
+      (when (.find m offset)
+        (let [match (.toMatchResult m)]
+          {:match-start (.start match)
+           :match-end (.end match)}))))
+  #?(:cljs
+     ([[m s] offset]
+      (if-let [match (.exec m (subs s offset))]
+        {:match-start (.-index match)
+         :match-end (.-lastIndex m)}))))
 
 (defrecord Section [name body start end inverted])
+
+(defn- str-replace
+  "Replace all instances of pattern in str"
+  [^String s ^Integer from ^Integer to]
+  #?(:clj (.replaceAll s from to))
+  #?(:cljs (str/replace s from to)))
 
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
@@ -41,7 +74,7 @@
    should not be quoted."
   [string replacements]
   (reduce (fn [string [from to dont-quote]]
-            (.replaceAll (str string) from
+            (str-replace (str string) from
                          (if dont-quote
                            to
                            (re-quote-replacement to))))
@@ -73,10 +106,39 @@
   (replace-all regex (map (fn [char] [(str "\\\\\\" char) char true])
                           regex-chars)))
 
+(defn- ^StringBuilder ->stringbuilder
+  ([] (->stringbuilder ""))
+  #?(:clj ([^String s] (StringBuilder. s)))
+  #?(:cljs ([s] s)))
+
+(defn- ^String sb->str [^StringBuilder s]
+  #?(:clj (.toString s))
+  #?(:cljs s))
+
+(defn- ^StringBuilder sb-replace
+  [^StringBuilder s ^Integer start ^Integer end ^String s']
+  #?(:clj (.replace s start end s'))
+  #?(:cljs (str (subs s 0 start) s' (subs s end))))
+
+(defn- ^StringBuilder sb-delete
+  [^StringBuilder s ^Integer start ^Integer end]
+  #?(:clj (.delete s start end))
+  #?(:cljs (str (subs s 0 start) (subs s end))))
+
+(defn- ^StringBuilder sb-append
+  [^StringBuilder s s']
+  #?(:clj (.append s s'))
+  #?(:cljs (str s s')))
+
+(defn- ^StringBuilder sb-insert
+  [^StringBuilder s ^Integer index ^StringBuilder s']
+  #?(:clj (.insert s index s'))
+  #?(:cljs (sb-replace s index index s')))
+
 (defn- process-set-delimiters
   "Replaces custom set delimiters with mustaches."
   [^String template data]
-  (let [builder (StringBuilder. template)
+  (let [builder (->stringbuilder template)
         data (atom data)
         open-delim (atom "\\{\\{")
         close-delim (atom "\\}\\}")
@@ -85,7 +147,7 @@
                              [[open-delim open] [close-delim close]]]
                        (swap! var (constantly (escape-regex delim)))))]
     (loop [offset 0]
-      (let [string (.toString builder)
+      (let [string (sb->str builder)
             custom-delim (not (= "\\{\\{" @open-delim))
             matcher (re-matcher
                      (re-pattern (str "(" @open-delim ".*?" @close-delim
@@ -93,18 +155,15 @@
                                         (str "|\\{\\{.*?\\}\\}"))
                                       ")"))
                      string)]
-        (if (.find matcher offset)
-          (let [match-result (.toMatchResult matcher)
-                match-start (.start match-result)
-                match-end (.end match-result)
-                match (.substring string match-start match-end)]
-            (if (and custom-delim
-                     (= "{{" (.substring string match-start (+ match-start 2))))
+        (when-let [match-result (matcher-find matcher offset)]
+          (let [{:keys [match-start match-end]} match-result
+                match (subs string match-start match-end)]
+            (if (and custom-delim (= "{{" (subs match 0 2)))
               (if-let [tag (re-find #"\{\{(.*?)\}\}" match)]
                 (do
-                  (.replace builder match-start match-end
+                  (sb-replace builder match-start match-end
                             (str "\\{\\{" (second tag) "\\}\\}"))
-                  (recur match-end)))
+                  (recur (int match-end))))
               (if-let [delim-change (re-find
                                      (re-pattern (str @open-delim
                                                       "=\\s*(.*?) (.*?)\\s*="
@@ -112,8 +171,8 @@
                                      match)]
                 (do
                   (apply set-delims (rest delim-change))
-                  (.delete builder match-start match-end)
-                  (recur match-start))
+                  (sb-delete builder match-start match-end)
+                  (recur (int match-start)))
                 (if-let [tag (re-find
                               (re-pattern (str @open-delim "(.*?)"
                                                @close-delim))
@@ -139,10 +198,10 @@
                                                   (unescape-regex @close-delim)
                                                   "=}}"
                                                   (old data)))))))
-                    (.replace builder match-start match-end
+                    (sb-replace builder match-start match-end
                               (str "{{" (second tag) "}}"))
-                    (recur match-end)))))))))
-    [(.toString builder) @data]))
+                    (recur (int match-end))))))))))
+    [(sb->str builder) @data]))
 
 (defn- create-partial-replacements
   "Creates pairs of partial replacements."
@@ -168,19 +227,31 @@
     (replace-all template [[(str "(^|[\n\r])[ \t]*" comment-regex
                                  "(\r\n|[\r\n]|$)") "$1" true]
                            [comment-regex ""]])))
+#?(:clj
+   (defn- next-index
+     "Return the next index of the supplied regex."
+     ([section regex] (next-index section regex 0))
+     ([^String section regex index]
+      (if (= index -1)
+        -1
+        (let [s (.substring section index)
+              matcher (re-matcher regex s)]
+          (if (nil? (re-find matcher))
+            -1
+            (+ index (.start (.toMatchResult matcher)))))))))
 
-(defn- next-index
-  "Return the next index of the supplied regex."
-  ([section regex]
-     (next-index section regex 0))
-  ([^String section regex index]
-     (if (= index -1)
-       -1
-       (let [s (.substring section index)
-             matcher (re-matcher regex s)]
-         (if (nil? (re-find matcher))
-           -1
-           (+ index (.start (.toMatchResult matcher))))))))
+#?(:cljs
+   (defn- next-index
+     "Return the next index of the supplied regex."
+     ([section regex] (next-index section regex 0))
+     ([^String section regex index]
+      (if (= index -1)
+        -1
+        (let [s (subs section index)
+              matcher (js/RegExp. (.-source (str regex)) "g")]
+          (if-let [m (.exec regex s)]
+            (+ index (.-index m))
+            -1))))))
 
 (defn- find-section-start-tag
   "Find the next section start tag, starting to search at index."
@@ -272,8 +343,8 @@
   (let [tag-type (last open-delim)
         section-tag (some #{tag-type} [\# \^ \/])
         section-end-tag (= tag-type \/)
-        builder (StringBuilder.)
-        tail-builder (if section-tag nil (StringBuilder.))
+        builder (->stringbuilder)
+        tail-builder (if section-tag nil (->stringbuilder))
         elements (split tag #"\.")
         element-to-invert (if (= tag-type \^)
                             (loop [path [(first elements)]
@@ -288,28 +359,28 @@
       (let [elements (if section-end-tag (reverse elements) elements)]
         (do
           (doseq [element (butlast elements)]
-            (.append builder (str "{{" (if section-end-tag "/"
+            (sb-append builder (str "{{" (if section-end-tag "/"
                                            (if (= element element-to-invert)
                                              "^" "#"))
                                   element "}}"))
             (if (not (nil? tail-builder))
-              (.insert tail-builder 0 (str "{{/" element "}}"))))
-          (.append builder (str open-delim (last elements) close-delim))
-          (str (.toString builder) (if (not (nil? tail-builder))
-                                     (.toString tail-builder))))))))
+              (sb-insert tail-builder 0 (str "{{/" element "}}"))))
+          (sb-append builder (str open-delim (last elements) close-delim))
+          (str (sb->str builder) (if (not (nil? tail-builder))
+                                     (sb->str tail-builder))))))))
 
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
   [^String template data]
   (loop [^String s ^String template]
     (let [matcher (re-matcher #"(\{\{[\{&#\^/]?)([^\}]+\.[^\}]+)(\}{2,3})" s)]
-      (if-let [match (re-find matcher)]
-        (let [match-start (.start matcher)
-              match-end (.end matcher)
-              converted (convert-path (str/trim (nth match 2)) (nth match 1)
-                                      (nth match 3) data)]
-          (recur (str (.substring s 0 match-start) converted
-                      (.substring s match-end))))
+      (if-let [match-result (matcher-find matcher)]
+        (let [{:keys [match-start match-end]} match-result
+              groups (re-groups matcher)
+              converted (convert-path (str/trim (nth groups 2)) (nth groups 1)
+                                      (nth groups 3) data)]
+          (recur (str (subs s 0 match-start) converted
+                      (subs s match-end))))
         s))))
 
 (defn- join-standalone-tags

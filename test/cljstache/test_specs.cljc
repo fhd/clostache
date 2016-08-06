@@ -1,16 +1,25 @@
 (ns cljstache.test-specs
-  (:require
-   #?(:clj  [clojure.test :refer :all]
-      :cljs [cljs.test :refer-macros [deftest testing is]])
-   [cljstache.core :refer [render]]
-   #?(:clj [clojure.data.json :as json])))
+  (:require [cljstache.core :refer [render]]
+            [clojure.string :as str]
+            #?(:clj [clojure.test :refer :all])
+            #?(:cljs [cljs.test :refer-macros [deftest testing is]])
+            #?(:clj [clojure.data.json :as json]))
+  #?(:cljs (:require-macros [cljstache.test-specs :refer [load-specs]])))
 
-(defn- load-spec-tests [spec]
-  (let [path (-> (Thread/currentThread)
-                 (.getContextClassLoader)
-                 (.getResourceAsStream (str "spec/specs/" spec ".json")))
-        data (json/read-json (slurp path))]
-    (:tests data)))
+;; We load the specs at compile time via macro
+;; for clojurescript compatibility
+
+(def specs ["comments" "delimiters" "interpolation" "sections" "inverted" "partials" "~lambdas"])
+
+(defn- spec-path [spec] (str "test-resources/spec/specs/" spec ".json"))
+
+#?(:clj (defn- load-spec-tests [spec]
+          (-> spec spec-path slurp json/read-json :tests)))
+
+#?(:clj (defmacro load-specs []
+          (into {} (for [spec specs] [spec (load-spec-tests spec)]))))
+
+(def spec-tests (load-specs))
 
 (defn- update-lambda-in [data f]
   (if (contains? data :lambda)
@@ -20,11 +29,13 @@
 (defn- extract-lambdas [data]
   (update-lambda-in data #(:clojure %)))
 
+#?(:cljs (def load-string identity))
+
 (defn- load-lambdas [data]
   (update-lambda-in data #(load-string %)))
 
 (defn- flatten-string [^String s]
-  (.replaceAll (.replaceAll s "\n" "\\\\n") "\r" "\\\\r"))
+  (str/replace (str/replace s "\n" "\\\\n") "\r" "\\\\r"))
 
 (defn run-spec-test [spec-test]
   (let [template (:template spec-test)
@@ -38,26 +49,39 @@
              (if partials (str "\nPartials: " partials))))))
 
 (defn run-spec-tests [spec]
-  (doseq [spec-test (load-spec-tests spec)]
+  (doseq [spec-test (spec-tests spec)]
     (run-spec-test spec-test)))
 
-(deftest test-comments
-  (run-spec-tests "comments"))
+;; OutOfMemoryError in cljs
+#?(:clj
+   (deftest test-comments
+     (run-spec-tests "comments")))
 
+;; Currently fails in cljs
 (deftest test-delimiters
   (run-spec-tests "delimiters"))
 
-(deftest test-interpolation
-  (run-spec-tests "interpolation"))
+;; OutOfMemoryError in cljs
+#?(:clj
+   (deftest test-interpolation
+     (run-spec-tests "interpolation")))
 
-(deftest test-sections
-  (run-spec-tests "sections"))
+;; OutOfMemoryError in cljs
+#?(:clj
+   (deftest test-sections
+     (run-spec-tests "sections")))
 
-(deftest test-inverted
-  (run-spec-tests "inverted"))
+;; OutOfMemoryError in cljs
+#?(:clj
+   (deftest test-inverted
+     (run-spec-tests "inverted")))
 
+;; Currently fails in cljs
 (deftest test-partials
   (run-spec-tests "partials"))
 
-(deftest test-lambdas
-  (run-spec-tests "~lambdas"))
+;; Lambdas are not supported in Clojurescript due to lack of `eval'
+;; http://blog.fogus.me/2011/07/29/compiling-clojure-to-javascript-pt-2-why-no-eval/
+#?(:clj
+   (deftest test-lambdas
+     (run-spec-tests "~lambdas")))

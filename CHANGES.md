@@ -1,5 +1,11 @@
-1.5.0
-=====
+2.0.0 (2016)
+============
+* Rename to cljstache
+* Add support for Clojure 1.7 - 1.9
+* Remove support for Clojure < 1.7
+
+1.5.0 (2014-05-07)
+==================
 * Handle path whitespace consistently.
 
 1.4.0 (2014-05-05)

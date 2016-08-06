@@ -3,7 +3,7 @@ Cljstache
 Logic-less {{ [mustache](http://mustache.github.com) }} templates for Clojure[Script].
 
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
-, including lambdas.
+, including lambdas (on jvm only.)
 
 Forked from [clostache](https://github.com/fhd/clostache) and updated to be compatible with ClojureScript.
 
@@ -17,10 +17,10 @@ The easiest way to use Cljstache in your project is via
 
 Add to project.clj
 
-# TODO: clojars badge
 ```clj
-[cljstache "1.6.0-SNAPSHOT"]
+[cljstache "2.0.0-SNAPSHOT"]
 ```
+<!-- TODO: Add clojars badge -->
 
 This is how you use Cljstache:
 
