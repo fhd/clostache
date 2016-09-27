@@ -1,16 +1,23 @@
 language: clojure
 
-script: lein test-clj
+script: lein test-$CLJ
 
 before_install:
   - git submodule update --init --recursive
   - yes | sudo lein upgrade
 
-jdk:
-  - openjdk6
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
+matrix:
+  include:
+  - jdk: openjdk6
+    env: CLJ=clj
+  - jdk: openjdk7
+    env: CLJ=clj
+  - jdk: oraclejdk7
+    env: CLJ=clj
+  - jdk: oraclejdk8
+    env: CLJ=clj
+  - jdk: oraclejdk8
+    env: CLJ=cljs
 
 sudo: required
 
