@@ -3,6 +3,7 @@
 * Rename to cljstache
 * Add support for Clojure 1.7 - 1.9
 * Remove support for Clojure < 1.7
+* Add support for ClojureScript 1.8 - 1.9
 
 1.5.0 (2014-05-07)
 ==================
