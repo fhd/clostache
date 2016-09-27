@@ -180,24 +180,22 @@
 (deftest test-render-inverted-boolean-false
   (is (= "Hello, Felix" (render "Hello, {{^condition}}Felix{{/condition}}"
                                 {:condition false}))))
-;; Currently fails for cljs
+
 (deftest test-render-with-delimiters
   (is (= "Hello, Felix" (render "{{=<% %>=}}Hello, <%name%>" {:name "Felix"}))))
 
-;; Currently fails for cljs
+
 (deftest test-render-with-regex-delimiters
   (is (= "Hello, Felix" (render "{{=[ ]=}}Hello, [name]" {:name "Felix"}))))
 
-;; Currently fails for cljs
+
 (deftest test-render-with-delimiters-changed-twice
   (is (= "Hello, Felix" (render "{{=[ ]=}}[greeting], [=<% %>=]<%name%>"
                                 {:greeting "Hello" :name "Felix"}))))
 
-;; Out of memory for cljs
-#?(:clj
-   (deftest test-render-tag-with-dotted-name-like-section
-     (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
-                                   {:felix {:name "Felix"}})))))
+(deftest test-render-tag-with-dotted-name-like-section
+  (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
+                                {:felix {:name "Felix"}}))))
 
 (deftest test-render-lambda
   (is (= "Hello, Felix" (render "Hello, {{name}}"
@@ -237,10 +235,8 @@
     (is (= "" (render "{{^l}}X{{/l}}" {:l l}))))
   (is (= "X" (render "{{^l}}X{{/l}}" {:l (sorted-set)}))))
 
-;; Out of Memory for cljs
-#?(:clj
-   (deftest test-path-whitespace-handled-consistently
-     (is (= (render "{{a}}" {:a "value"}) "value"))
-     (is (= (render "{{ a }}" {:a "value"}) "value"))
-     (is (= (render "{{a.b}}" {:a {:b "value"}}) "value"))
-     (is (= (render "{{ a.b }}" {:a {:b "value"}}) "value"))))
+(deftest test-path-whitespace-handled-consistently
+  (is (= (render "{{a}}" {:a "value"}) "value"))
+  (is (= (render "{{ a }}" {:a "value"}) "value"))
+  (is (= (render "{{a.b}}" {:a {:b "value"}}) "value"))
+  (is (= (render "{{ a.b }}" {:a {:b "value"}}) "value")))

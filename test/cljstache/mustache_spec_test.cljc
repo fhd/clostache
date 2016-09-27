@@ -2,6 +2,8 @@
   "Test against the [Mustache spec](http://github.com/mustache/spec)"
   (:require [cljstache.core :refer [render]]
             [clojure.string :as str]
+            ;; #?(:cljs [cljs.tools.reader :refer [read-string]])
+            ;; #?(:cljs [cljs.js :refer [empty-state js-eval]])
             #?(:clj [clojure.test :refer :all])
             #?(:cljs [cljs.test :refer-macros [deftest testing is]])
             #?(:clj [clojure.data.json :as json]))
@@ -30,7 +32,15 @@
 (defn- extract-lambdas [data]
   (update-lambda-in data #(:clojure %)))
 
-#?(:cljs (def load-string identity))
+#?(:cljs (defn load-string [s] s
+         #_(:value
+            (when-let [f (read-string s)]
+              (cljs.js/eval (cljs.js/empty-state)
+                            f
+                            {:eval js-eval
+                             :source-map true
+                             :context :expr}
+                            (fn [x] (println x) x))))))
 
 (defn- load-lambdas [data]
   (update-lambda-in data #(load-string %)))
@@ -53,36 +63,25 @@
   (doseq [spec-test (spec-tests spec)]
     (run-spec-test spec-test)))
 
-;; OutOfMemoryError in cljs
-#?(:clj
-   (deftest test-comments
-     (run-spec-tests "comments")))
+(deftest test-comments
+  (run-spec-tests "comments"))
 
-;; Currently fails in cljs
 (deftest test-delimiters
   (run-spec-tests "delimiters"))
 
-;; OutOfMemoryError in cljs
-#?(:clj
-   (deftest test-interpolation
-     (run-spec-tests "interpolation")))
+(deftest test-interpolation
+  (run-spec-tests "interpolation"))
 
-;; OutOfMemoryError in cljs
-#?(:clj
-   (deftest test-sections
-     (run-spec-tests "sections")))
+(deftest test-sections
+  (run-spec-tests "sections"))
 
-;; OutOfMemoryError in cljs
-#?(:clj
-   (deftest test-inverted
-     (run-spec-tests "inverted")))
+(deftest test-inverted
+  (run-spec-tests "inverted"))
 
-;; Currently fails in cljs
 (deftest test-partials
   (run-spec-tests "partials"))
 
-;; Lambdas are not supported in Clojurescript due to lack of `eval'
-;; http://blog.fogus.me/2011/07/29/compiling-clojure-to-javascript-pt-2-why-no-eval/
+;; Unable to load the labdas in cljs due to eval issues
 #?(:clj
    (deftest test-lambdas
      (run-spec-tests "~lambdas")))

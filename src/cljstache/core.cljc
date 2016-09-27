@@ -467,7 +467,8 @@
 
 #?(:clj
    (defn render-resource
-     "Renders a resource located on the classpath"
+     "Renders a resource located on the classpath.
+      Only available on the JVM"
      ([^String path]
       (render (slurp (io/resource path)) {}))
      ([^String path data]

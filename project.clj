@@ -11,8 +11,7 @@
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [org.clojure/data.json "0.1.2"]
-                                  [jline/jline "0.9.94"]
-                                  [org.mozilla/rhino "1.7.7"]]
+                                  [jline/jline "0.9.94"]]
                    :resource-paths ["test-resources"]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
@@ -28,7 +27,7 @@
   :aliases {"with-clj" ["with-profile" "dev:dev,1.7:dev,1.8:dev,1.9"]
             "with-cljs" ["with-profile" "cljs:cljs1.8"]
             "test-clj" ["with-clj" "test"]
-            "test-cljs" ["with-cljs" "doo" "rhino" "test" "once"]
+            "test-cljs" ["with-cljs" "doo" "nashorn" "test" "once"]
             "test-all" ["do" "clean," "test-clj," "test-cljs"]
             "deploy" ["do" "clean," "deploy" "clojars"]}
 
