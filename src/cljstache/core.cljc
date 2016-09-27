@@ -54,9 +54,9 @@
            :match-end (.end match)}))))
   #?(:cljs
      ([[m s] offset]
-      (if-let [match (.exec m (subs s offset))]
+      (when-let [match (.exec m (subs s offset))]
         {:match-start (+ (.-index match) offset)
-         :match-end (+ (.-index match) (count match) offset)}))))
+         :match-end (+ (.-index match) (-> match first count) offset)}))))
 
 (defrecord Section [name body start end inverted])
 

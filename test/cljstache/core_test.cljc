@@ -35,11 +35,16 @@
 
 (deftest matcher-find-test
   (is (= {:match-start 2
-          :match-end 3}
-         (cs/matcher-find (re-matcher #"\d" "ab1def"))))
+          :match-end 7}
+         (cs/matcher-find (re-matcher #"\d+" "ab12345def"))))
   (is (= {:match-start 6
           :match-end 7}
-         (cs/matcher-find (re-matcher #"\d" "ab1def4") 3))))
+         (cs/matcher-find (re-matcher #"\d" "ab1def4") 3)))
+  (is (= {:match-start 5
+          :match-end 12}
+         (cs/matcher-find
+          (#'cs/delim-matcher (#'cs/escape-regex "<%") (#'cs/escape-regex "%>")
+                              "asdf <%foo%> lkhasdf")))))
 
 (deftest str-replace-test
   (is (= "password" (#'cs/str-replace "pa55word" "\\d" "s")))
@@ -75,6 +80,13 @@
     (testing "sb-insert"
       (is (= "abc123def"
              (-> (b) (#'cs/sb-insert 3 "123") (#'cs/sb->str)))))))
+
+
+
+(deftest process-set-delimiters-test
+  (testing "Correctly replaces custom delimiters"
+    (is (= ["Hello, {{name}}" {:name "Felix"}]
+           (#'cs/process-set-delimiters "{{=<% %>=}}Hello, <%name%>" {:name "Felix"})))))
 
 ;; Render Tests
 
