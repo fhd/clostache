@@ -374,7 +374,7 @@ git submodule update --init
 And run them against all supported Clojure versions:
 
 ```
-lein all test
+lein test-all
 ```
 
 Requirements

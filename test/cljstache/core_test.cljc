@@ -1,8 +1,82 @@
-(ns cljstache.test-parser
+(ns cljstache.core-test
   (:require
    #?(:clj  [clojure.test :refer :all]
       :cljs [cljs.test :refer-macros [deftest testing is]])
-   [cljstache.core :refer [render] :as cs]))
+   #?(:clj [cljstache.core :as cs :refer [render render-resource]])
+   #?(:cljs [cljstache.core :as cs :refer [render re-matcher re-find re-groups]])))
+
+;; cljs compatibility tests
+
+(deftest test-re-quote-replacement
+  (is (= "$abc" (#'cs/str-replace "foo" "foo" (cs/re-quote-replacement "$abc"))))
+  (is (= "fabc\\abc"
+         (#'cs/str-replace "foo" "oo" (cs/re-quote-replacement "abc\\abc"))))
+  (is (= "f$abc\\abc$"
+         (#'cs/str-replace "foo" "oo" (cs/re-quote-replacement "$abc\\abc$")))))
+
+(deftest re-find-test
+  (is (= "1" (re-find (re-pattern "\\d") "ab1def")))
+  (is (= "1" (re-find (re-matcher #"\d" "ab1def"))))
+  (is (= ["1" "1"] (re-find (re-matcher #"(\d)" "ab1de3f"))))
+  (is (= ["<%foo%>" "<%foo%>"]
+         (re-find
+          (#'cs/delim-matcher (#'cs/escape-regex "<%") (#'cs/escape-regex "%>")
+                              "asdf <%foo%> lkhasdf"))))
+  (is (= ["{{=<% %>=}}" "<%" "%>"]
+         (#'cs/find-custom-delimiters
+          "\\{\\{"
+          "\\}\\}"
+          "{{=<% %>=}}Hello, <%name%>"))))
+
+(deftest re-groups-test
+  (let [matcher (re-matcher #"(\d)" "ab1cd3")
+        match (re-find matcher)]
+    (is (= ["1" "1"] (vec (re-groups matcher))))))
+
+(deftest matcher-find-test
+  (is (= {:match-start 2
+          :match-end 3}
+         (cs/matcher-find (re-matcher #"\d" "ab1def"))))
+  (is (= {:match-start 6
+          :match-end 7}
+         (cs/matcher-find (re-matcher #"\d" "ab1def4") 3))))
+
+(deftest str-replace-test
+  (is (= "password" (#'cs/str-replace "pa55word" "\\d" "s")))
+  (is (= "password" (#'cs/str-replace "pasword" "s" "ss"))))
+
+(deftest replace-all-test
+  (testing "escape-html"
+   (is (= "&lt;html&gt;&amp;&quot;"
+          (#'cs/escape-html "<html>&\""))))
+  (testing "indent-partial"
+    (is (= "a\n-->b\n-->c\n-->d"
+           (#'cs/indent-partial "a\nb\nc\nd" "-->"))))
+  (testing "escape-regex"
+    (is (= "\\\\\\{\\}\\[\\]\\(\\)\\.\\?\\^\\+\\-\\|="
+           (#'cs/escape-regex "\\{}[]().?^+-|="))))
+  (testing "unescape-regex"
+    (is (= "{}[]().?^+-|=\\"
+         (#'cs/unescape-regex "\\{\\}\\[\\]\\(\\)\\.\\?\\^\\+\\-\\|=\\")))))
+
+(deftest stringbuilder-test
+  (let [b (fn [] (#'cs/->stringbuilder "abcdef"))]
+    (testing "sb->str"
+      (is (= "abcdef" (#'cs/sb->str (b)))))
+    (testing "sb-replace"
+      (is (= "abcDDDef"
+             (-> (b) (#'cs/sb-replace 3 4 "DDD") (#'cs/sb->str)))))
+    (testing "sb-delete"
+      (is (= "abcef"
+             (-> (b) (#'cs/sb-delete 3 4) (#'cs/sb->str)))))
+    (testing "sb-append"
+      (is (= "abcdefghijk"
+             (-> (b) (#'cs/sb-append "ghijk") (#'cs/sb->str)))))
+    (testing "sb-insert"
+      (is (= "abc123def"
+             (-> (b) (#'cs/sb-insert 3 "123") (#'cs/sb->str)))))))
+
+;; Render Tests
 
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
@@ -128,7 +202,7 @@
 ;; Not implemented for cljs
 #?(:clj
    (deftest test-render-resource-template
-     (is (= "Hello, Felix" (cs/render-resource "templates/hello.mustache" {:name "Felix"})))))
+     (is (= "Hello, Felix" (render-resource "templates/hello.mustache" {:name "Felix"})))))
 
 (deftest test-render-with-partial
   (is (= "Hi, Felix" (render "Hi, {{>name}}" {:n "Felix"} {:name "{{n}}"}))))

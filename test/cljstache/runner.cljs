@@ -1,8 +1,8 @@
 (ns cljstache.runner
   "A stub namespace to run cljs tests using doo"
   (:require [doo.runner :refer-macros [doo-tests]]
-            [cljstache.test-parser]
-            [cljstache.test-specs]))
+            [cljstache.core-test]
+            [cljstache.mustache-spec-test]))
 
-(doo-tests 'cljstache.test-parser
-           'cljstache.test-specs)
+(doo-tests 'cljstache.core-test
+           'cljstache.mustache-spec-test)

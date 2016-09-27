@@ -16,13 +16,17 @@
                    :resource-paths ["test-resources"]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha10"]]}
-             :cljs {:dependencies [[org.clojure/clojurescript "1.8.51"]]
-                    :plugins [[lein-cljsbuild "1.1.3"]
-                              [lein-doo "0.1.6"]]}}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha12"]]}
+             :cljs1.8 {:dependencies [[org.clojure/clojurescript "1.8.51"]]
+                       :plugins [[lein-cljsbuild "1.1.3"]
+                                 [lein-doo "0.1.6"]]}
+             :cljs {:dependencies [[org.clojure/clojure "1.9.0-alpha12"]
+                                   [org.clojure/clojurescript "1.9.229"]]
+                       :plugins [[lein-cljsbuild "1.1.3"]
+                                 [lein-doo "0.1.6"]]}}
 
   :aliases {"with-clj" ["with-profile" "dev:dev,1.7:dev,1.8:dev,1.9"]
-            "with-cljs" ["with-profile" "cljs"]
+            "with-cljs" ["with-profile" "cljs:cljs1.8"]
             "test-clj" ["with-clj" "test"]
             "test-cljs" ["with-cljs" "doo" "rhino" "test" "once"]
             "test-all" ["do" "clean," "test-clj," "test-cljs"]
@@ -33,6 +37,8 @@
   :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}}
 
   :global-vars {*warn-on-reflection* true}
+
+  :clean-targets [:target-path "out"]
 
   :cljsbuild {:builds
               {:test {:source-paths ["src" "test"]

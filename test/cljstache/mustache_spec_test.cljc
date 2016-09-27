@@ -1,10 +1,11 @@
-(ns cljstache.test-specs
+(ns cljstache.mustache-spec-test
+  "Test against the [Mustache spec](http://github.com/mustache/spec)"
   (:require [cljstache.core :refer [render]]
             [clojure.string :as str]
             #?(:clj [clojure.test :refer :all])
             #?(:cljs [cljs.test :refer-macros [deftest testing is]])
             #?(:clj [clojure.data.json :as json]))
-  #?(:cljs (:require-macros [cljstache.test-specs :refer [load-specs]])))
+  #?(:cljs (:require-macros [cljstache.mustache-spec-test :refer [load-specs]])))
 
 ;; We load the specs at compile time via macro
 ;; for clojurescript compatibility

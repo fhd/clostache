@@ -6,7 +6,7 @@
 ;; cljs support
 (def re-quote-replacement
   #?(:clj str/re-quote-replacement
-     :cljs (fn [s] s)))
+     :cljs identity))
 
 ;; clj < 1.9 support
 #?(:clj
@@ -55,16 +55,16 @@
   #?(:cljs
      ([[m s] offset]
       (if-let [match (.exec m (subs s offset))]
-        {:match-start (.-index match)
-         :match-end (.-lastIndex m)}))))
+        {:match-start (+ (.-index match) offset)
+         :match-end (+ (.-index match) (count match) offset)}))))
 
 (defrecord Section [name body start end inverted])
 
 (defn- str-replace
   "Replace all instances of pattern in str"
-  [^String s ^Integer from ^Integer to]
+  [^String s ^String from ^String to]
   #?(:clj (.replaceAll s from to))
-  #?(:cljs (str/replace s from to)))
+  #?(:cljs (str/replace s (re-pattern from) to)))
 
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
@@ -109,71 +109,79 @@
 (defn- ^StringBuilder ->stringbuilder
   ([] (->stringbuilder ""))
   #?(:clj ([^String s] (StringBuilder. s)))
-  #?(:cljs ([s] s)))
+  #?(:cljs ([s] (atom s))))
+
+(defn- sb!
+  "Perform mutation on stringbuilder object"
+  [s f]
+  (swap! s f) s)
 
 (defn- ^String sb->str [^StringBuilder s]
   #?(:clj (.toString s))
-  #?(:cljs s))
+  #?(:cljs @s))
 
 (defn- ^StringBuilder sb-replace
   [^StringBuilder s ^Integer start ^Integer end ^String s']
   #?(:clj (.replace s start end s'))
-  #?(:cljs (str (subs s 0 start) s' (subs s end))))
+  #?(:cljs (sb! s #(str (subs % 0 start) s' (subs % end)))))
 
 (defn- ^StringBuilder sb-delete
   [^StringBuilder s ^Integer start ^Integer end]
   #?(:clj (.delete s start end))
-  #?(:cljs (str (subs s 0 start) (subs s end))))
+  #?(:cljs (sb! s #(str (subs % 0 start) (subs % end)))))
 
 (defn- ^StringBuilder sb-append
   [^StringBuilder s s']
   #?(:clj (.append s s'))
-  #?(:cljs (str s s')))
+  #?(:cljs (sb! s #(str % s'))))
 
 (defn- ^StringBuilder sb-insert
   [^StringBuilder s ^Integer index ^StringBuilder s']
   #?(:clj (.insert s index s'))
   #?(:cljs (sb-replace s index index s')))
 
+(defn- delim-matcher [open close s]
+  (re-matcher
+   (re-pattern (str "(" open ".*?" close
+                    (when (not= "\\{\\{" open)
+                        (str "|\\{\\{.*?\\}\\}"))
+                    ")"))
+   s))
+
+(defn- find-custom-delimiters [open close s]
+  (re-find (re-pattern (str open "=\\s*(.*?) (.*?)\\s*=" close)) s))
+
 (defn- process-set-delimiters
   "Replaces custom set delimiters with mustaches."
   [^String template data]
   (let [builder (->stringbuilder template)
         data (atom data)
-        open-delim (atom "\\{\\{")
-        close-delim (atom "\\}\\}")
+        open-delim (atom (escape-regex "{{"))
+        close-delim (atom (escape-regex "}}"))
         set-delims (fn [open close]
                      (doseq [[var delim]
                              [[open-delim open] [close-delim close]]]
                        (swap! var (constantly (escape-regex delim)))))]
     (loop [offset 0]
-      (let [string (sb->str builder)
-            custom-delim (not (= "\\{\\{" @open-delim))
-            matcher (re-matcher
-                     (re-pattern (str "(" @open-delim ".*?" @close-delim
-                                      (if custom-delim
-                                        (str "|\\{\\{.*?\\}\\}"))
-                                      ")"))
-                     string)]
+      (let [custom-delim? (not= "\\{\\{" @open-delim)
+            s (sb->str builder)
+            matcher (delim-matcher @open-delim @close-delim s)]
         (when-let [match-result (matcher-find matcher offset)]
           (let [{:keys [match-start match-end]} match-result
-                match (subs string match-start match-end)]
-            (if (and custom-delim (= "{{" (subs match 0 2)))
-              (if-let [tag (re-find #"\{\{(.*?)\}\}" match)]
-                (do
-                  (sb-replace builder match-start match-end
+                match (subs s match-start match-end)]
+            (if (and custom-delim? (= "{{" (subs match 0 2)))
+              (when-let [tag (re-find #"\{\{(.*?)\}\}" match)]
+                (sb-replace builder match-start match-end
                             (str "\\{\\{" (second tag) "\\}\\}"))
-                  (recur (int match-end))))
-              (if-let [delim-change (re-find
-                                     (re-pattern (str @open-delim
-                                                      "=\\s*(.*?) (.*?)\\s*="
-                                                      @close-delim))
-                                     match)]
+                (recur (int match-end)))
+              (if-let [delim-change
+                       (find-custom-delimiters
+                        @open-delim @close-delim match)]
                 (do
                   (apply set-delims (rest delim-change))
                   (sb-delete builder match-start match-end)
                   (recur (int match-start)))
-                (if-let [tag (re-find
+                (when-let [tag (re-find
                               (re-pattern (str @open-delim "(.*?)"
                                                @close-delim))
                               match)]
@@ -234,7 +242,7 @@
      ([^String section regex index]
       (if (= index -1)
         -1
-        (let [s (.substring section index)
+        (let [s (subs section index)
               matcher (re-matcher regex s)]
           (if (nil? (re-find matcher))
             -1
@@ -266,7 +274,7 @@
         next-end (.indexOf ^String template "{{/" index)]
     (if (= next-end -1)
       -1
-      (if (and (not (= next-start -1)) (< next-start next-end))
+      (if (and (not= next-start -1) (< next-start next-end))
         (find-section-end-tag template (+ next-start 3) (inc level))
         (if (= level 1)
           next-end
@@ -276,28 +284,26 @@
   "Extracts the outer section from the template."
   [^String template]
   (let [^Long start (find-section-start-tag template 0)]
-    (if (= start -1)
-      nil
+    (when (not= start -1)
       (let [inverted (= (str (.charAt template (+ start 2))) "^")
             ^Long end-tag (find-section-end-tag template (+ start 3) 1)]
-        (if (= end-tag -1)
-          nil
+        (when (not= end-tag -1)
           (let [end (+ (.indexOf template "}}" end-tag) 2)
-                section (.substring template start end)
+                section (subs template start end)
                 body-start (+ (.indexOf section "}}") 2)
                 body-end (.lastIndexOf section "{{")
                 body (if (or (= body-start -1) (= body-end -1)
                              (< body-end body-start))
                        ""
-                       (.substring section body-start body-end))
-                section-name (.trim (.substring section 3
+                       (subs section body-start body-end))
+                section-name (.trim (subs section 3
                                                 (.indexOf section "}}")))]
             (Section. section-name body start end inverted)))))))
 
 (defn- replace-all-callback
   "Replaces each occurrence of the regex with the return value of the callback."
   [^String string regex callback]
-  (str/replace string regex #(callback %)))
+  (str/replace string regex callback))
 
 (declare render-template)
 
@@ -344,12 +350,12 @@
         section-tag (some #{tag-type} [\# \^ \/])
         section-end-tag (= tag-type \/)
         builder (->stringbuilder)
-        tail-builder (if section-tag nil (->stringbuilder))
+        tail-builder (when-not section-tag (->stringbuilder))
         elements (split tag #"\.")
-        element-to-invert (if (= tag-type \^)
+        element-to-invert (when (= tag-type \^)
                             (loop [path [(first elements)]
                                    remaining-elements (rest elements)]
-                              (if (not (empty? remaining-elements))
+                              (when-not (empty? remaining-elements)
                                 (if (nil? (path-data path data))
                                   (last path)
                                   (recur (conj path (first remaining-elements))
@@ -357,17 +363,16 @@
     (if (and (not section-tag) (nil? (path-data elements data)))
       ""
       (let [elements (if section-end-tag (reverse elements) elements)]
-        (do
-          (doseq [element (butlast elements)]
-            (sb-append builder (str "{{" (if section-end-tag "/"
+        (doseq [element (butlast elements)]
+          (sb-append builder (str "{{" (if section-end-tag "/"
                                            (if (= element element-to-invert)
                                              "^" "#"))
                                   element "}}"))
-            (if (not (nil? tail-builder))
-              (sb-insert tail-builder 0 (str "{{/" element "}}"))))
-          (sb-append builder (str open-delim (last elements) close-delim))
-          (str (sb->str builder) (if (not (nil? tail-builder))
-                                     (sb->str tail-builder))))))))
+          (if (not (nil? tail-builder))
+            (sb-insert tail-builder 0 (str "{{/" element "}}"))))
+        (sb-append builder (str open-delim (last elements) close-delim))
+        (str (sb->str builder) (if (not (nil? tail-builder))
+                                 (sb->str tail-builder)))))))
 
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
@@ -444,8 +449,8 @@
         ^String section (extract-section template)]
     (if (nil? section)
       (replace-variables template data partials)
-      (let [before (.substring template 0 (:start section))
-            after (.substring template (:end section))]
+      (let [before (subs template 0 (:start section))
+            after (subs template (:end section))]
         (recur (str before (render-section section data partials) after) data
                partials)))))
 
