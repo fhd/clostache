@@ -1,55 +1,38 @@
-Clostache
+Cljstache
 =========
-
-[{{ mustache }}](http://mustache.github.com) for Clojure.
+{{ [mustache](http://mustache.github.com) }} templates for Clojure[Script].
 
 Compliant with the [Mustache spec](http://github.com/mustache/spec)
-since version 1.0. Supporting lambdas since version 1.1.
+, including lambdas (jvm only)
 
-Works with Clojure 1.3 since version 1.2. If you want to use Clostache
-in Clojure 1.2 projects, use version 1.1.
+Forked from [clostache](https://github.com/fhd/clostache) and updated to be compatible with ClojureScript.
 
-[![Build Status](https://secure.travis-ci.org/fhd/clostache.png?branch=master)](http://travis-ci.org/fhd/clostache)
+[![Build Status](https://travis-ci.org/fotoetienne/cljstache.svg?branch=master)](https://travis-ci.org/fotoetienne/cljstache)
 
 Usage
 -----
 
-The easiest way to use Clostache in your project is via
-[Clojars](http://clojars.org/de.ubercode.clostache/clostache).
+The easiest way to use Cljstache in your project is via
+[Clojars](http://clojars.org/fotoetienne/cljstache).
 
-Leiningen:
-
-```clj
-[de.ubercode.clostache/clostache "1.4.0"]
-```
-
-Maven:
-
-```xml
-<dependency>
-  <groupId>de.ubercode.clostache</groupId>
-  <artifactId>clostache</artifactId>
-  <version>1.4.0</version>
-</dependency>
-```
-
-To install it via [cljr](https://github.com/liebke/cljr), run:
-
-```
-clrj install de.ubercode.clostache/clostache
-```
-
-This is how you use Clostache:
+Add to project.clj
 
 ```clj
-(use 'clostache.parser)
+[cljstache "2.0.0-SNAPSHOT"]
+```
+<!-- TODO: Add clojars badge -->
+
+This is how you use Cljstache:
+
+```clj
+(use 'cljstache.core)
 (render "Hello, {{name}}!" {:name "Felix"})
 ```
 
 You can render a resource from the classpath like this:
 
 ```clj
-(use 'clostache.parser)
+(use 'cljstache.core)
 (render-resource "templates/hello.mustache" {:name "Michael"})
 ```
 
@@ -351,9 +334,9 @@ Output:
 ```
 Hello, World!
 Hello, Felix!
-```  
+```
 
-Functions can also render the text given to them if they need to do something more complicated.  
+Functions can also render the text given to them if they need to do something more complicated.
 
 Template:
 
@@ -363,13 +346,13 @@ Template:
 
 Data:
 ```clj
-{:people [{:name "Felix"}] 
- :upper (fn [text] 
-          (fn [render-fn] 
+{:people [{:name "Felix"}]
+ :upper (fn [text]
+          (fn [render-fn]
             (clojure.string/upper-case (render-fn text))))}
 ```
 
-Output:  
+Output:
 
 ```
 Hello FELIX
@@ -391,8 +374,14 @@ git submodule update --init
 And run them against all supported Clojure versions:
 
 ```
-lein all test
+lein test-all
 ```
+
+Requirements
+------------
+
+As steadyhash uses Clojure's reader conditionals, steadyhash is dependent on both Clojure 1.7 and Leiningen 2.5.2 or later.
+Java 8 or greater is required to run the clojurescript tests (using Nashorn.)
 
 License
 -------
@@ -417,6 +406,7 @@ Floor, Boston, MA 02110-1301 USA
 Contributors
 ------------
 
+* [Felix H. Dahlke](https://github.com/fhd) (Original Author)
 * [Rory Geoghegan](https://github.com/rgeoghegan)
 * [Santtu Lintervo](https://github.com/santervo)
 * [Pierre-Alexandre St-Jean](https://github.com/pastjean)
