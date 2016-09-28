@@ -36,7 +36,8 @@
   (replace-all string [["&" "&amp;"]
                        ["\"" "&quot;"]
                        ["<" "&lt;"]
-                       [">" "&gt;"]]))
+                       [">" "&gt;"]
+                       ["'","&apos;"]]))
 
 (defn- indent-partial
   "Indent all lines of the partial by indent."

@@ -27,8 +27,8 @@
          (render "{{&string}}" {:string "&\"<>"}))))
 
 (deftest test-render-html-escaped
-  (is (= "&amp;&quot;&lt;&gt;"
-         (render "{{string}}" {:string "&\"<>"}))))
+  (is (= "&amp;&quot;&lt;&gt;&apos;"
+         (render "{{string}}" {:string "&\"<>'"}))))
 
 (deftest test-render-list
   (is (= "Hello, Felix, Jenny!" (render "Hello{{#names}}, {{name}}{{/names}}!"
