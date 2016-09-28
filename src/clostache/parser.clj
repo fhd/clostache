@@ -229,8 +229,7 @@
                                               (dissoc data var-name)
                                               partials)
                                              var-value)
-                                 var-value (Matcher/quoteReplacement
-                                            (str var-value))]
+                                 var-value (str var-value)]
                              (cond (= var-type "") (escape-html var-value)
                                    (= var-type ">") (render-template (var-k partials) data partials)
                                    :else var-value)))))
