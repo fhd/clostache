@@ -2,6 +2,7 @@
   "A parser for mustache templates."
   (:use [clojure.string :only (split)]
         [clojure.core.incubator :only (seqable?)])
+  (:refer-clojure :exclude (seqable?))
   (:require [clojure.java.io :as io]
             [clojure.string  :as str])
   (:import java.util.regex.Matcher))
