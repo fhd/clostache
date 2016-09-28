@@ -107,6 +107,23 @@
   (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
                                 {:felix {:name "Felix"}}))))
 
+(deftest test-render-tag-with-dotted-name-like-section-inside-another-section
+  (is (= "Hello, Felix" (render "Hello, {{#person}}{{felix.name}}{{/person}}"
+                                {:person {:felix {:name "Felix"}}}))))
+
+(deftest test-render-tag-with-multiple-dotted-name-like-section-inside-another-section
+  (is (= "Hello, Felix FELIX" (render "Hello, {{#person}}{{felix.name}} {{felix.upper}}{{/person}}"
+                                      {:person {:felix {:name "Felix" :upper "FELIX"}}}))))
+
+(deftest test-render-tag-with-multiple-dotted-name-like-section-inside-different-sections
+  (is (= "Hello, Felix FELIX 21 Some Address" (render "Hello, {{#person}}{{felix.name}} {{felix.upper}}{{/person}} {{#address}}{{home.line1}}{{/address}}"
+                                                      {:person {:felix {:name "Felix" :upper "FELIX"} }
+                                                       :address {:home {:line1 "21 Some Address"}}}))))
+
+(deftest test-render-tag-with-dotted-name-like-section-inside-multiple-sections
+  (is (= "Hello, Felix" (render "Hello, {{#person}}{{#felix}}{{name.first}}{{/felix}}{{/person}}"
+                                {:person {:felix {:name {:first "Felix"}}}}))))
+
 (deftest test-render-lambda
   (is (= "Hello, Felix" (render "Hello, {{name}}"
                                 {:name (fn [] "Felix")}))))
