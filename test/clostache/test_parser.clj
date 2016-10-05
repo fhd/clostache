@@ -107,6 +107,10 @@
   (is (= "Hello, Felix" (render "Hello, {{felix.name}}"
                                 {:felix {:name "Felix"}}))))
 
+(deftest test-render-tag-with-dotted-name-like-section--inside-another-section
+  (is (= "photo thumb" (render "{{#photos}}{{src}} {{thumb.src}}{{/photos}}"
+                                {:photos [{:src "photo" :thumb {:src "thumb"}}]}))))
+
 (deftest test-render-lambda
   (is (= "Hello, Felix" (render "Hello, {{name}}"
                                 {:name (fn [] "Felix")}))))
