@@ -1,7 +1,7 @@
 (ns clostache.parser
   "A parser for mustache templates."
   (:use [clojure.string :only (split)]
-        [clojure.core.incubator :only (seqable?)])
+        [clojure.core :only (seqable?)])
   (:refer-clojure :exclude (seqable?))
   (:require [clojure.java.io :as io]
             [clojure.string  :as str])
