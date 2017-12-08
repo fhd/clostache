@@ -339,7 +339,9 @@
               result))
           (let [section-data (cond (sequential? section-data) section-data
                                    (map? section-data) [section-data]
-                                   (seqable? section-data) (seq section-data)
+                                   (and
+                                      (seqable? section-data)
+                                      (not (string? section-data))) (seq section-data)
                                    :else [{}])
                 section-data (if (map? (first section-data))
                                section-data
