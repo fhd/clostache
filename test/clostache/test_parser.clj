@@ -5,6 +5,9 @@
 (deftest test-render-simple
   (is (= "Hello, Felix" (render "Hello, {{name}}" {:name "Felix"}))))
 
+(deftest test-render-string-as-single-value
+  (is (= "Hello, Felix" (render "Hello, {{#name}}{{name}}{{/name}}" {:name "Felix"}))))
+
 (deftest test-render-with-dollar-sign
   (is (= "Hello, $Felix!" (render "Hello, {{! This is a comment.}}{{name}}!"
                                   {:name "$Felix"}))))
